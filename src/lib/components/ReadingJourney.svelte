@@ -23,7 +23,11 @@
 			if (event.key === PROGRESS_KEY || event.key === null) refresh();
 		};
 		window.addEventListener('storage', sync);
-		return () => window.removeEventListener('storage', sync);
+		window.addEventListener('reading-progress', refresh);
+		return () => {
+			window.removeEventListener('storage', sync);
+			window.removeEventListener('reading-progress', refresh);
+		};
 	});
 </script>
 

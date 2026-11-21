@@ -2,6 +2,7 @@ import { self } from '$app/service-worker';
 import { version } from '$app/env';
 import { assets, immutable, prerendered } from '$app/manifest';
 import { CACHE_PREFIX, canHandleRequest, obsoleteCaches } from '../lib/pwa/cache-policy';
+import { audioRangeResponse } from '../lib/pwa/range';
 
 const CACHE = `${CACHE_PREFIX}${version}`;
 const resourcePath = (path: string) =>
@@ -14,7 +15,8 @@ const paths = [
 				(file) =>
 					file.path === 'manifest.webmanifest' ||
 					file.path === 'offline.html' ||
-					file.path.startsWith('icons/')
+					file.path.startsWith('icons/') ||
+					file.path.startsWith('audio/')
 			)
 			.map((file) => resourcePath(file.path)),
 		...prerendered.map((page) => resourcePath(page.path))
@@ -56,9 +58,16 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('fetch', (event) => {
 	const { request } = event;
-	if (!canHandleRequest(request, self.location.origin)) return;
 	const url = new URL(request.url);
 	const known = precached.has(url.pathname);
+	const rangedAudio =
+		known &&
+		url.pathname.startsWith(resourcePath('audio/')) &&
+		request.headers.has('range') &&
+		request.method === 'GET' &&
+		url.origin === self.location.origin &&
+		!request.headers.has('authorization');
+	if (!canHandleRequest(request, self.location.origin) && !rangedAudio) return;
 	const oldBuildAsset = url.pathname.startsWith(resourcePath('_app/immutable/'));
 	if (!known && !oldBuildAsset && request.mode !== 'navigate') return;
 
@@ -68,7 +77,8 @@ self.addEventListener('fetch', (event) => {
 			if (known) {
 				// Keep HTML and its matching JS from one deployment until an update is accepted.
 				const cached = await cache.match(url.pathname);
-				if (cached) return cached;
+				if (cached)
+					return rangedAudio ? audioRangeResponse(cached, request.headers.get('range')!) : cached;
 			} else if (oldBuildAsset) {
 				for (const name of (await caches.keys()).filter((name) => name.startsWith(CACHE_PREFIX))) {
 					const cached = await (await caches.open(name)).match(url.pathname);
@@ -77,7 +87,13 @@ self.addEventListener('fetch', (event) => {
 			}
 			try {
 				const response = await fetch(request);
-				if (known && response.ok && !response.redirected && response.type === 'basic') {
+				if (
+					known &&
+					!rangedAudio &&
+					response.ok &&
+					!response.redirected &&
+					response.type === 'basic'
+				) {
 					await cache.put(url.pathname, response.clone()).catch(() => {});
 				}
 				return response;

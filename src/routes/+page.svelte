@@ -76,8 +76,8 @@
 					<div>
 						<h3>Read it. Or hear it.</h3>
 						<p>
-							Follow on screen or let your browser read aloud. Your place is saved as you go, so you
-							can return when you’re ready.
+							Follow on screen or listen to the natural Kokoro narration. Your place is saved as you
+							go, so you can return when you’re ready.
 						</p>
 						<span class="feature-note">Reading and audio available now</span>
 					</div>
@@ -87,10 +87,13 @@
 					<div>
 						<h3>Make room for understanding.</h3>
 						<p>
-							Finish Genesis 1 with a short chapter overview. Next, we’re adding Scripture-grounded
-							answers to your written and spoken questions.
+							Finish Genesis 1 with a written or spoken overview, explore study notes, and ask a
+							question by typing or dictating. Live AI answers require the question service to be
+							connected.
 						</p>
-						<span class="feature-note">Chapter overview now · AI questions planned</span>
+						<span class="feature-note">
+							Spoken overview · Chapter study notes · Question interface
+						</span>
 					</div>
 				</article>
 			</div>
@@ -124,17 +127,18 @@
 			<Details>
 				<Summary>Can I listen and ask questions out loud?</Summary>
 				<p>
-					Browser narration is available now where supported. Spoken questions and spoken AI answers
-					are planned. You’ll still be able to type, and the microphone will only be used when you
-					choose to speak.
+					Yes. Listen to a continuous chapter and summary recording, or choose Read & type. Where
+					dictation is supported, choose Listen & speak to ask a question aloud. AI questions need
+					the server service to be connected; editorial study notes are available now. The
+					microphone is only used when you choose to speak.
 				</p>
 			</Details>
 			<Details>
 				<Summary>Is the entire Bible available yet?</Summary>
 				<p>
 					This first release includes Genesis 1 and its chapter overview. The full journey will
-					follow the Bible in order, from Genesis to Revelation. AI questions and the remaining
-					chapters are the next stage.
+					follow the Bible in order, from Genesis to Revelation. The remaining chapters are the next
+					stage.
 				</p>
 			</Details>
 		</div>

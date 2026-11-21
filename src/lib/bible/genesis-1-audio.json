@@ -1,0 +1,223 @@
+{
+	"src": "/audio/genesis-1-heart-80fd772154f9.mp3",
+	"audioSha256": "80fd772154f90ec242b3a718b63d154a3addd062eddb35d6075bfb7dd1fe8951",
+	"voice": "Heart",
+	"model": "Kokoro-82M",
+	"modelLicense": "Apache-2.0",
+	"synthetic": true,
+	"duration": 300.6,
+	"summaryStart": 253.925,
+	"textSha256": "c3ed47a57e0818986bf1e8bcc92978288241c83ff8f3baf2871eed6e90a25611",
+	"cues": [
+		{
+			"kind": "verse",
+			"verse": 1,
+			"start": 0,
+			"end": 3.425
+		},
+		{
+			"kind": "verse",
+			"verse": 2,
+			"start": 3.825,
+			"end": 12.625
+		},
+		{
+			"kind": "verse",
+			"verse": 3,
+			"start": 13.025,
+			"end": 16.275
+		},
+		{
+			"kind": "verse",
+			"verse": 4,
+			"start": 16.675,
+			"end": 21.975
+		},
+		{
+			"kind": "verse",
+			"verse": 5,
+			"start": 22.375,
+			"end": 29.025
+		},
+		{
+			"kind": "verse",
+			"verse": 6,
+			"start": 29.425,
+			"end": 35.825
+		},
+		{
+			"kind": "verse",
+			"verse": 7,
+			"start": 36.225,
+			"end": 44.45
+		},
+		{
+			"kind": "verse",
+			"verse": 8,
+			"start": 44.85,
+			"end": 50.175
+		},
+		{
+			"kind": "verse",
+			"verse": 9,
+			"start": 50.575,
+			"end": 58.325
+		},
+		{
+			"kind": "verse",
+			"verse": 10,
+			"start": 58.725,
+			"end": 65.975
+		},
+		{
+			"kind": "verse",
+			"verse": 11,
+			"start": 66.375,
+			"end": 76.45
+		},
+		{
+			"kind": "verse",
+			"verse": 12,
+			"start": 76.85,
+			"end": 86.85
+		},
+		{
+			"kind": "verse",
+			"verse": 13,
+			"start": 87.25,
+			"end": 90.6
+		},
+		{
+			"kind": "verse",
+			"verse": 14,
+			"start": 91,
+			"end": 100.8
+		},
+		{
+			"kind": "verse",
+			"verse": 15,
+			"start": 101.2,
+			"end": 106.95
+		},
+		{
+			"kind": "verse",
+			"verse": 16,
+			"start": 107.35,
+			"end": 115.025
+		},
+		{
+			"kind": "verse",
+			"verse": 17,
+			"start": 115.425,
+			"end": 119.825
+		},
+		{
+			"kind": "verse",
+			"verse": 18,
+			"start": 120.225,
+			"end": 127.1
+		},
+		{
+			"kind": "verse",
+			"verse": 19,
+			"start": 127.5,
+			"end": 130.75
+		},
+		{
+			"kind": "verse",
+			"verse": 20,
+			"start": 131.15,
+			"end": 138.95
+		},
+		{
+			"kind": "verse",
+			"verse": 21,
+			"start": 139.35,
+			"end": 151.675
+		},
+		{
+			"kind": "verse",
+			"verse": 22,
+			"start": 152.075,
+			"end": 160.225
+		},
+		{
+			"kind": "verse",
+			"verse": 23,
+			"start": 160.625,
+			"end": 164
+		},
+		{
+			"kind": "verse",
+			"verse": 24,
+			"start": 164.4,
+			"end": 174.225
+		},
+		{
+			"kind": "verse",
+			"verse": 25,
+			"start": 174.625,
+			"end": 185.35
+		},
+		{
+			"kind": "verse",
+			"verse": 26,
+			"start": 185.75,
+			"end": 200.6
+		},
+		{
+			"kind": "verse",
+			"verse": 27,
+			"start": 201,
+			"end": 208.225
+		},
+		{
+			"kind": "verse",
+			"verse": 28,
+			"start": 208.625,
+			"end": 222.15
+		},
+		{
+			"kind": "verse",
+			"verse": 29,
+			"start": 222.55,
+			"end": 233.225
+		},
+		{
+			"kind": "verse",
+			"verse": 30,
+			"start": 233.625,
+			"end": 244.65
+		},
+		{
+			"kind": "verse",
+			"verse": 31,
+			"start": 245.05,
+			"end": 252.625
+		},
+		{
+			"kind": "summary",
+			"verse": null,
+			"start": 253.925,
+			"end": 260.675
+		},
+		{
+			"kind": "summary",
+			"verse": null,
+			"start": 261.075,
+			"end": 277.8
+		},
+		{
+			"kind": "summary",
+			"verse": null,
+			"start": 278.2,
+			"end": 293.775
+		},
+		{
+			"kind": "summary",
+			"verse": null,
+			"start": 294.175,
+			"end": 300.2
+		}
+	]
+}

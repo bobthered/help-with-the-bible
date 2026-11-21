@@ -23,6 +23,9 @@
 - Use the public-domain World English Bible provisionally until the user chooses a translation.
 - Spoken reading must narrate the stored Scripture text. Require an explicit user action to start audio or microphone capture, and preserve typed/read-only fallbacks.
 - Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
+- Use the persistent root native audio player for recorded Scripture and summaries. Keep each chapter and its spoken summary in one track so background playback does not depend on JavaScript starting the next segment.
+- Keep generated narration and timing metadata synchronized with verified Scripture and separate editorial summaries. Model downloads belong in ignored `.cache/`, not the browser bundle.
+- Maintain typed input and text output alongside explicit microphone and spoken-answer controls. Show missing AI configuration honestly; keep provider credentials server-only and enforce durable request limits.
 
 ## Progressive web app
 
@@ -30,6 +33,13 @@
 - Maintain the native SvelteKit 3 worker in `src/service-worker`, with its separate TypeScript project. Cache only build-known public resources and prerendered pages; never cache question APIs, uploads, or authenticated responses.
 - Make updates opt-in during an active reading session and preserve local reading progress. Keep offline support limited to bundled or explicitly downloaded content; AI requests require a connection.
 - Run `npm run check`, `npm test`, and `npm run verify:pwa` after a production build when changing PWA behavior. Actual-device installation and audio behavior still require browser/device QA.
+- Support byte ranges only for known cached narration; never cache private AI responses.
+
+## Motion and touch behavior
+
+- Apply scroll reveals from the single Svelte 5 root attachment in `+layout.svelte`. Discover descendants programmatically; do not add animation markup to individual components/tags.
+- Respect reduced motion, keep keyboard-focused content visible, and clean up observers on teardown.
+- Keep the requested application zoom restrictions and 16px minimum form-control text; browser accessibility settings may override viewport restrictions.
 
 ## Components
 

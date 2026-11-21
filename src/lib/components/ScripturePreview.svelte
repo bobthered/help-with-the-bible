@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { ReadAloud, BookOpen } from '$lib/components';
+	import { Button, BookOpen, Play } from '$lib/components';
+	import { getContext } from 'svelte';
+	import { AUDIO_CONTEXT, type AudioState } from '$lib/audio/context';
+	const player = getContext<AudioState>(AUDIO_CONTEXT);
 	import chapter from '$lib/bible/genesis-1.json';
 	const verses = chapter.verses.slice(0, 3);
 </script>
@@ -13,6 +16,12 @@
 		{/each}
 	</div>
 	<div class="preview-footer">
-		<ReadAloud {verses} label="Listen to these verses" /><span>World English Bible</span>
+		<Button
+			variants={['ghost']}
+			class="audio-button"
+			onclick={() => (player.playing ? player.pause() : void player.play(0))}
+		>
+			<Play size={15} />{player.playing ? 'Pause narration' : 'Listen to Genesis 1'}
+		</Button><span>World English Bible · Kokoro Heart</span>
 	</div>
 </aside>

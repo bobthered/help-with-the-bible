@@ -72,6 +72,7 @@ runInNewContext(readFileSync('.svelte-kit/output/client/service-worker.js', 'utf
 	fetch: fetchFile,
 	Request: BrowserRequest,
 	Response,
+	Headers,
 	URL,
 	Set
 });
@@ -81,6 +82,7 @@ for (const phase of ['install', 'activate']) {
 	await Promise.all(pending);
 }
 online = false;
+const recording = JSON.parse(readFileSync('src/lib/bible/genesis-1-audio.json', 'utf8'));
 for (const path of [
 	'/',
 	'/read',
@@ -89,7 +91,8 @@ for (const path of [
 	'/icons/icon-192.png',
 	'/icons/icon-512.png',
 	'/icons/maskable-512.png',
-	'/icons/apple-touch-icon.png'
+	'/icons/apple-touch-icon.png',
+	recording.src
 ]) {
 	const request = new BrowserRequest(path);
 	Object.defineProperty(request, 'mode', { value: path.includes('.') ? 'cors' : 'navigate' });
@@ -104,6 +107,17 @@ for (const path of [
 	assert.equal(response?.status, 200, `Unavailable offline: ${path}`);
 	assert.ok((await response.arrayBuffer()).byteLength > 0, `Empty offline resource: ${path}`);
 }
+const rangedRequest = new BrowserRequest(recording.src, { headers: { Range: 'bytes=0-1023' } });
+let rangedResult;
+handlers.get('fetch')({
+	request: rangedRequest,
+	respondWith: (response) => {
+		rangedResult = response;
+	}
+});
+const rangedResponse = await rangedResult;
+assert.equal(rangedResponse?.status, 206, 'Cached audio must support Safari byte-range requests');
+assert.equal((await rangedResponse.arrayBuffer()).byteLength, 1024);
 const scriptBodies = await Promise.all(
 	[...entries.entries()]
 		.filter(([path]) => path.endsWith('.js'))
@@ -116,5 +130,5 @@ assert.ok(
 	'Scripture was not included in the offline bundle'
 );
 console.log(
-	`PWA build verified: ${entries.size} real resources precached; pages, icons, and Scripture available with the network disabled.`
+	`PWA build verified: ${entries.size} real resources precached; pages, icons, Scripture, and ranged narration available with the network disabled.`
 );

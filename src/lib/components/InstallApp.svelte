@@ -64,8 +64,9 @@
 	<div class="install-details">
 		<h2>Your place stays with you on this device.</h2>
 		<p>
-			Offline reading includes the currently available Genesis chapter and overview. Some voices
-			need internet, and future AI questions will require a connection.
+			Offline reading includes Genesis 1, its recorded chapter and summary narration, and editorial
+			study notes. Live AI answers and microphone dictation need a connection. Device voices may
+			also need internet.
 		</p>
 		<p>
 			Reading progress is stored locally, without an account or device sync. Some platforms keep the

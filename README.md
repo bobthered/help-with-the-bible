@@ -2,7 +2,7 @@
 
 SvelteKit 3 project using Svelte 5, TypeScript 6, Tailwind CSS 4, and Sveltewind.
 
-The landing page introduces a sequential Scripture-reading experience. `/read` currently includes all 31 verses of Genesis 1, optional browser narration, versioned local progress, and a chapter overview. Full-Bible coverage, AI questions, and microphone input are planned; they are not connected in this release.
+The landing page introduces a sequential Scripture-reading experience. `/read` includes all 31 verses of Genesis 1, a continuous Kokoro chapter-and-summary recording, local progress, editorial study notes, and typed/dictated questions. Live AI answers require the private server credentials below. The remaining Bible chapters are not included yet.
 
 ## Development
 
@@ -22,6 +22,7 @@ npm run build   # Production build for Vercel
 npm run preview # Preview the production build locally
 npm run verify:pwa # Verify the built worker with the network disabled in a test harness
 npm run icons   # Regenerate PNG app icons from the project book mark
+npm run narration # Regenerate the committed chapter/summary MP3 and verse cues locally
 ```
 
 ## Components and themes
@@ -52,7 +53,17 @@ Sveltewind setup references: [installation and configuration](https://github.com
 
 Import this repository into Vercel and select the SvelteKit framework preset. Use `npm run build` and leave the output directory at the framework default. The Vercel adapter is configured in `vite.config.ts` and produces `.vercel/output` during the build. Use a supported Node.js version satisfying the package's `engines` requirement.
 
-The landing, reader, and installation pages are prerendered for reliable offline caching. The Vercel adapter remains configured for future server-side question and voice endpoints. The complete production build has been verified, including Vercel packaging.
+The landing, reader, and installation pages are prerendered for reliable offline caching. `/api/study` runs on Vercel for live question answers; it is excluded from offline caching.
+
+Application and worker compilation pass locally. On this Windows account, the adapter's final API-function packaging requires symlink permissions that are unavailable (`EPERM`); no OS settings were changed. The standard Vercel adapter remains configured for deployment on Vercel's build environment.
+
+To enable live answers, copy `.env.example` to `.env` for local development, or configure private Vercel environment variables and redeploy:
+
+- `OPENAI_API_KEY`: the application's API key, never a public/client variable.
+- `OPENAI_MODEL`: defaults to `gpt-4.1-mini`; select and evaluate another supported text model if desired.
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: a Redis REST endpoint and write token for a durable 10-question-per-IP hourly limit. The endpoint fails closed if the limiter is unavailable.
+
+No credentials are committed. The interface reports when live answers are unavailable; the three editorial study notes still work offline. Set provider project spending limits before exposing the paid endpoint. Each question is independent; conversation history and reading progress are not sent to OpenAI. Model calls use `store: false`. [OpenAI text model](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [Redis REST setup](https://upstash.com/docs/redis/features/restapi).
 
 ## Installable app and offline reading
 
@@ -66,9 +77,9 @@ Browser installation behavior varies; the app keeps manual guidance available ev
 
 `static/manifest.webmanifest` declares the standalone app, stable identity, reading shortcut, and 192/512px PNG icons. It includes a separate maskable Android icon; Apple devices use the 180px touch icon. Regenerate the icons with `npm run icons`. The page metadata and safe-area spacing support home-screen launches and devices with display cutouts. [Manifest icon formats](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest/Reference/icons).
 
-The native worker in `src/service-worker/index.ts` precaches the production JavaScript/CSS, icons, manifest, offline fallback, and the three prerendered pages. The bundled Genesis text and overview therefore work offline after the first successful setup, even if the reader was not opened beforehand. `/install` shows when offline setup is ready. Initial installation needs a connection, and browser storage can later be cleared or evicted.
+The native worker in `src/service-worker/index.ts` precaches the production JavaScript/CSS, icons, manifest, chapter MP3, offline fallback, and the three prerendered pages. Genesis text, its recorded chapter/summary, and editorial study notes work offline after the first successful setup, even if the reader was not opened beforehand. `/install` shows when setup is ready. Initial installation needs a connection, and browser storage can later be cleared or evicted.
 
-Only known public build resources are cached. APIs, POST requests, authenticated requests, byte ranges, and external resources bypass the worker. Unknown pages get a dedicated fallback when offline. Browser narration may need a network-backed device voice, and future AI questions/transcription will require a connection. Background or lock-screen narration is not guaranteed across mobile platforms.
+Only known public build resources are cached. APIs, POST requests, authenticated requests, non-audio byte ranges, and external resources bypass the worker. Cached narration supports single-range HTTP 206 responses, including Safari's open and suffix ranges; invalid ranges return 416. Unknown pages get a dedicated fallback when offline. Live AI answers and browser dictation need a connection. Device voices used for dynamic answers may also need network access.
 
 The worker uses versioned caches and does not force a reload while reading. When a new worker is waiting, the app offers Update app. Accepting it activates the update and reloads the app; local reading progress is preserved. The previous deployment cache remains available for other open tabs. A failed precache download discards the incomplete new cache and leaves the working version intact. Vercel headers ensure browsers revalidate the worker and manifest. [SvelteKit service-worker support](https://svelte.dev/docs/kit/service-workers).
 
@@ -82,7 +93,7 @@ npm run verify:pwa
 npm run preview
 ```
 
-The unit tests simulate installation, offline navigation, failed downloads, API bypass, and update activation. `verify:pwa` executes the emitted production worker against the actual output files, disables its simulated network, and checks offline pages, icons, and Scripture inclusion. These checks do not replace device testing.
+The tests cover offline navigation, range responses, failed downloads, API bypass, update activation, narration checksums/cues, AI output validation, rate limits, and root-attachment motion behavior. `verify:pwa` executes the emitted production worker against the actual output files, disables its simulated network, and checks offline pages, icons, Scripture, and ranged MP3 playback data. These checks do not replace device testing.
 
 Before public release, verify installation on Chrome/Edge desktop, Android Chrome, and iOS Safari; then launch the installed app offline, advance verses, close/reopen, and confirm progress resumes. Test portrait/landscape safe areas and narration on each device. For updates, keep one reading tab open while deploying a new version, accept Update app, and confirm the saved verse survives. Real-device installation and audio checks have not been performed in this development environment.
 
@@ -117,7 +128,7 @@ Use the OpenAI Responses API through a SvelteKit server endpoint on Vercel. This
 
 A local Ollama model is useful for private development but requires a running model server; its default local API is on the developer's machine. My recommendation for the public Vercel site is a hosted API, avoiding a separate always-on inference service or large model downloads on visitors' devices. Self-hosting remains an option if infrastructure and privacy requirements justify it. [Ollama deployment options](https://docs.ollama.com/api/introduction), [Vercel function constraints](https://vercel.com/docs/functions/limitations).
 
-The next server endpoint should accept `{ chapterId, translationId, question, recentTurns }` with bounded lengths, then resolve trusted chapter text on the server. Never trust chapter content supplied by the browser. Provide that chapter and limited conversation context to the model, asking it to distinguish textual observation from interpretation, cite book/chapter/verse, acknowledge meaningful differences among traditions, and say when the supplied text does not establish an answer.
+`/api/study` accepts `{ chapterId: "GEN.1", question }`, limits request size and question length, and resolves trusted chapter text on the server. It does not accept Bible text from the browser. The model is instructed to separate observation from interpretation, cite supporting verses, acknowledge differing readings, and identify uncertainty. Each request currently stands alone; bounded conversational context can be added later.
 
 Use structured output such as `{ answer, references, uncertainty }`. Validate referenced verse IDs against the corpus, and render any Scripture quotes from the canonical dataset rather than the model's spelling. Schema validation checks shape and references, not theological correctness; evaluate answers against reviewed examples and review summaries editorially. Cross-chapter questions can use a constrained passage lookup tool over the canonical dataset. A vector database is unnecessary for the initial chapter-scoped flow. [Structured output support](https://developers.openai.com/api/docs/guides/structured-outputs).
 
@@ -125,17 +136,29 @@ Keep `OPENAI_API_KEY` in private Vercel environment variables and server-only mo
 
 Prefer prewritten or generated-and-reviewed chapter overviews served with the corpus. They are stable, fast, and do not require a fresh AI call after every chapter. Label all analysis separately from Scripture, as the current Genesis 1 overview does. Questions remain dynamic.
 
-## Voice roadmap
+## Narration and spoken interaction
 
-Browser `speechSynthesis` is the first narration option and is already connected. It starts only after a click, reads one stored verse per utterance, updates the highlighted verse, and cancels on unmount. A stopped or failed utterance does not finish the chapter. Users can always navigate the written text. Voice availability and quality depend on the device; some operating-system voices may use network services. [Speech synthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+The committed recording uses the open Kokoro-82M model and its stock `af_heart` voice, generated locally with `kokoro-js`. No voice was cloned. One MP3 contains all 31 verses, a pause, a spoken announcement separating commentary from Scripture, and the overview/reflection. It is about five minutes and 2.3 MB. Visitors download the recording, not the speech model, and listening requires no TTS API key. [Kokoro model and license](https://huggingface.co/hexgrad/Kokoro-82M).
 
-For spoken questions, first add push-to-talk recording, a server-side transcription request, an editable transcript, and the same question endpoint used for typing. Explicitly request microphone access, stop tracks after recording, limit recording size/duration, and disclose the destination before uploading audio. Avoid depending solely on browser `SpeechRecognition`: support is limited and some implementations send audio to a recognition service. [Browser recognition limits](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
+`npm run narration` downloads/caches the model under ignored `.cache/`, synthesizes the exact stored verse strings, and writes a content-addressed MP3 plus timing cues and checksums. The generator reuses cached waveforms, so repeated encoding does not repeat inference. Narration tooling is development-only; it is not imported by Vercel request handlers. Regenerate after changing Scripture/summary text and review the audio before releasing it; automated checksum/timing checks do not prove spoken-word accuracy.
 
-For natural spoken conversations and spoken answers, add OpenAI Realtime over WebRTC after the text Q&A has passed evaluation. The Vercel backend creates short-lived session credentials; the permanent key stays private. Pause Scripture narration when a question begins, ground answers through the same passage lookup, and resume the bookmarked verse only on the reader's instruction. Keep verbatim Scripture playback separate from the conversational model. [Realtime browser architecture](https://developers.openai.com/api/docs/guides/realtime).
+`AudioPlayer.svelte` owns a persistent native `<audio>` element at the root layout. It remains mounted during navigation and requests the playback audio-session type where supported. Media Session handlers provide lock-screen play/pause/seek controls. Verse position is derived from media time rather than JavaScript timers, and returning from the background catches up the reader and stored progress. The summary is part of the same media resource, so it does not need a new JavaScript-initiated track when iOS suspends the page. [Media Session controls](https://developer.mozilla.org/en-US/docs/Web/API/Media_Session_API), [audio-session types](https://www.w3.org/TR/audio-session/).
+
+The intended background case is locking the screen or switching to another app after starting playback. Playback begins with a user gesture. Operating-system interruptions, browser suspension, battery modes, and eviction still need real-device testing, especially on iOS; no iPhone background-playback test was possible here. The implementation does not promise continued playback after force-quitting. A download link also lets readers use their device's audio player.
+
+Read & type and Listen & speak modes are saved locally. Finishing a chapter in voice mode starts the recorded summary; normal playback already flows into it. The summary also has a Listen button. Chapter study notes and live AI answers can be spoken using a selectable English device voice. These dynamic voices can sound different from the recorded Kokoro voice and are foreground-oriented.
+
+Microphone dictation uses feature-detected browser `SpeechRecognition`/`webkitSpeechRecognition`, with permission/error handling and typing fallback. Audio is processed by the browser's recognition service, which can be remote. In text mode, review/edit the transcript before submitting; in voice mode, a completed spoken question is submitted automatically and its answer is read aloud. Starting a question pauses narration; it is not resumed automatically over the answer. Support depends on the browser; server-side recording/transcription or Realtime is a future option for broader voice support. [Recognition support](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
+
+## Root motion and zoom behavior
+
+`revealOnScroll` is attached once to the root wrapper in `+layout.svelte`. It uses intersection/mutation observers to discover semantic page blocks after navigation and reveal offscreen blocks with a 12px slide and 420ms fade. No animation attributes are added to individual component markup. It preserves initial-viewport visibility, reveals keyboard-focused content immediately, respects reduced motion, and cleans up observers/animations.
+
+Viewport limits, root gesture handling, and touch-action prevent application pinch/double-tap zoom where permitted; form controls remain at least 16px to avoid iOS focus zoom. Browser/OS accessibility overrides and browser chrome zoom remain outside a site's complete control.
 
 ## Delivery sequence
 
 1. Confirm translation/canon; import and validate the full corpus, then add sequential chapter navigation and progress export/import.
-2. Connect the grounded text-question endpoint with rate limiting and evaluation fixtures. Publish reviewed chapter overviews alongside the corpus.
-3. Add push-to-talk transcription and optional spoken answers, followed by Realtime if conversational turn-taking is needed.
-4. Verify mobile layouts, keyboard/screen-reader navigation, blocked storage, narration interruption, and microphone permissions in actual browsers before public launch.
+2. Configure private AI/rate-limit credentials and evaluate live chapter questions; publish reviewed overviews alongside the full corpus.
+3. Consider server transcription and hosted natural answer speech/Realtime if device dictation/voices do not meet quality and browser-support needs.
+4. Verify iOS locked-screen playback across the chapter-to-summary boundary, Android/desktop media controls, mobile layouts, reduced motion, blocked storage, and microphone permissions on actual devices before public launch.

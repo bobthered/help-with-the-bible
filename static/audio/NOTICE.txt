@@ -1,0 +1,5 @@
+Narration generated with Kokoro-82M (Apache-2.0), voice af_heart.
+Model: https://huggingface.co/hexgrad/Kokoro-82M
+Runtime: https://github.com/hexgrad/kokoro/tree/main/kokoro.js
+Scripture: World English Bible (public domain), https://ebible.org/engwebp/GEN01.htm
+Summary: Help with the Bible editorial commentary. This is a synthetic voice, not a human recording.

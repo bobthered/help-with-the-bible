@@ -4,6 +4,7 @@ import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 import ts from 'typescript';
 import { CACHE_PREFIX, canHandleRequest, obsoleteCaches } from '../src/lib/pwa/cache-policy.ts';
+import { audioRangeResponse } from '../src/lib/pwa/range.ts';
 
 const origin = 'https://bible.example';
 const workerSource = ts.transpileModule(
@@ -74,11 +75,13 @@ function harness() {
 				{ path: 'offline.html' },
 				{ path: 'manifest.webmanifest' },
 				{ path: 'icons/icon-192.png' },
+				{ path: 'audio/chapter.mp3' },
 				{ path: 'unrelated.txt' }
 			],
 			prerendered: [{ path: '' }, { path: 'read' }, { path: 'install' }]
 		},
-		'../lib/pwa/cache-policy': { CACHE_PREFIX, canHandleRequest, obsoleteCaches }
+		'../lib/pwa/cache-policy': { CACHE_PREFIX, canHandleRequest, obsoleteCaches },
+		'../lib/pwa/range': { audioRangeResponse }
 	};
 	runInNewContext(workerSource, {
 		require: (id: string) => {
@@ -177,6 +180,21 @@ test('unknown offline navigation gets a fallback without substituting the wrong 
 	const response = await worker.request('/not-downloaded');
 	assert.equal(response?.status, 503);
 	assert.equal(await response?.text(), 'Cached content for /offline.html');
+});
+
+test('offline Safari byte-range requests are served only for known cached narration', async () => {
+	const worker = harness();
+	await worker.dispatch('install');
+	worker.setOnline(false);
+	const response = await worker.request('/audio/chapter.mp3', 'cors', {
+		headers: { Range: 'bytes=0-5' }
+	});
+	assert.equal(response?.status, 206);
+	assert.equal(await response?.text(), 'Cached');
+	assert.equal(
+		await worker.request('/audio/not-downloaded.mp3', 'cors', { headers: { Range: 'bytes=0-5' } }),
+		undefined
+	);
 });
 
 test('question APIs, uploads, authenticated requests, byte ranges, and other origins bypass the worker', async () => {

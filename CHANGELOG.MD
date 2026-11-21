@@ -1,10 +1,10 @@
 # Changes
 
-- Make the site installable on desktop, iOS, and Android with a standalone web manifest, PNG app icons, Android maskable icon, and Apple touch metadata.
-- Add a native SvelteKit service worker to cache the landing page, Genesis reader, installation guidance, and bundled Scripture for offline use.
-- Prerender the three public pages and provide an offline fallback without caching question APIs, uploads, authenticated requests, or external resources.
-- Add connection notices and an explicit app-update flow that preserves reading progress and retains the previous deployment for open tabs.
-- Add an installation page with native prompts where supported and manual instructions for iPhone, iPad, Android, and desktop browsers.
-- Add safe-area spacing, theme-aware browser chrome, and Vercel cache headers for worker and manifest updates.
-- Add reproducible app-icon generation, service-worker type checks, PWA lifecycle tests, and verification of the emitted offline build.
-- Document installation, offline limits, device storage behavior, and platform verification steps; update project PWA instructions.
+- Generate natural Kokoro Heart narration locally, combining Genesis 1 and its clearly labeled chapter summary into one committed MP3 with verse cues and checksums.
+- Replace queued browser chapter speech with a persistent root audio player, lock-screen media controls, playback-session support, seeking, and saved audio position for background listening.
+- Cache recorded narration and serve Safari-compatible byte ranges offline.
+- Add Read & type / Listen & speak modes, spoken summaries, selectable device voices for answers, and microphone dictation with a typing fallback.
+- Add chapter questions, offline editorial study notes, cited canonical verses, and a server-only OpenAI endpoint with structured-output validation and durable hourly request limits. Live answers require private environment configuration.
+- Add one root Svelte 5 attachment for automatic scroll fades/slides, dynamic content discovery, keyboard-focus handling, and reduced-motion support.
+- Restrict application zoom gestures and retain 16px minimum form-control text to avoid iOS focus zoom.
+- Add narration generation tooling, private environment examples, playback/range/question/motion tests, and offline audio build verification; update project documentation and instructions.

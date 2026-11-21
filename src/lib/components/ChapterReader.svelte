@@ -1,24 +1,46 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { A, Button, ReadAloud, BookOpen, Check } from '$lib/components';
+	import { getContext, onMount } from 'svelte';
+	import {
+		A,
+		Button,
+		BookOpen,
+		Check,
+		ChapterQuestions,
+		InteractionSettings
+	} from '$lib/components';
 	import chapter from '$lib/bible/genesis-1.json';
+	import summary from '$lib/bible/genesis-1-summary.json';
+	import recording from '$lib/bible/genesis-1-audio.json';
+	import { AUDIO_CONTEXT, type AudioState } from '$lib/audio/context';
 	import { initialProgress, loadProgress, saveProgress } from '$lib/reading/progress';
-
-	let progress = $state(initialProgress());
-	let ready = $state(false);
-	let storageError = $state(false);
-	let readingAloud = $state(false);
+	const player = getContext<AudioState>(AUDIO_CONTEXT);
+	let progress = $state(initialProgress()),
+		ready = $state(false),
+		storageError = $state(false);
 	const verse = $derived(chapter.verses[progress.verse - 1]);
-
+	const verseStart = (number: number) =>
+		recording.cues.find((cue) => cue.verse === number)?.start ?? 0;
 	onMount(() => {
-		try {
-			progress = loadProgress(localStorage);
-		} catch {
-			storageError = true;
+		function restore() {
+			try {
+				progress = loadProgress(localStorage);
+				storageError = false;
+			} catch {
+				storageError = true;
+			}
+			if (player.started && player.playing)
+				progress = {
+					...progress,
+					verse: player.verse,
+					phase: player.phase,
+					completedChapterIds: player.phase === 'summary' ? ['GEN.1'] : progress.completedChapterIds
+				};
+			ready = true;
 		}
-		ready = true;
+		restore();
+		window.addEventListener('reading-progress', restore);
+		return () => window.removeEventListener('reading-progress', restore);
 	});
-
 	function persist() {
 		try {
 			saveProgress(localStorage, progress);
@@ -27,15 +49,29 @@
 			storageError = true;
 		}
 	}
-
 	function goTo(number: number) {
+		player.pause();
+		player.stopSpeech();
 		progress = { ...progress, verse: Math.max(1, Math.min(31, number)), phase: 'reading' };
+		if (player.started) player.seek(verseStart(progress.verse));
 		persist();
 	}
-
 	function complete() {
+		player.pause();
 		progress = { ...progress, verse: 31, phase: 'summary', completedChapterIds: ['GEN.1'] };
 		persist();
+		if (player.mode === 'voice') void player.play(recording.summaryStart);
+	}
+	function listen() {
+		if (player.playing) {
+			player.pause();
+			return;
+		}
+		void player.play(
+			player.currentTime > 0 && player.verse === progress.verse
+				? undefined
+				: verseStart(progress.verse)
+		);
 	}
 </script>
 
@@ -48,39 +84,35 @@
 		<h1 id="reader-heading">Genesis <span>1</span></h1>
 		<p>The beginning</p>
 	</header>
-	{#if !ready}
-		<p class="reader-loading" role="status">Finding your place…</p>
+	<InteractionSettings />
+	{#if !ready}<p class="reader-loading" role="status">Finding your place…</p>
 	{:else if progress.phase === 'reading'}
 		<div class="reader-status">
 			<span>Verse {progress.verse} of 31</span><span>
-				{storageError ? 'Reading in this session' : 'Your place is saved'}
+				{storageError || player.storageError ? 'Reading in this session' : 'Your place is saved'}
 			</span>
 		</div>
 		<progress class="reader-progress" max="31" value={progress.verse - 1} aria-label="Verses read"
 		></progress>
-		<div class="verse-sheet" aria-live="polite" aria-atomic="true">
+		<div class="verse-sheet" aria-live={player.playing ? 'off' : 'polite'} aria-atomic="true">
 			<span class="verse-number">{verse.number}</span>
 			<p>{verse.text}</p>
 		</div>
 		<div class="reader-toolbar">
-			<ReadAloud
-				verses={chapter.verses}
-				startIndex={progress.verse - 1}
-				onverse={(index) => goTo(index + 1)}
-				oncomplete={complete}
-				onstate={(value) => (readingAloud = value)}
-			/>
+			<Button variants={['ghost']} class="audio-button" onclick={listen}>
+				{player.playing ? 'Pause narration' : 'Listen to chapter & summary'}
+			</Button>
 			<div class="verse-navigation">
 				<Button
 					variants={['ghost']}
 					class="button-secondary"
-					disabled={progress.verse === 1 || readingAloud}
+					disabled={progress.verse === 1 || player.playing}
 					onclick={() => goTo(progress.verse - 1)}
 				>
 					Previous verse
 				</Button><Button
 					class="button-primary"
-					disabled={readingAloud}
+					disabled={player.playing}
 					onclick={() => (progress.verse === 31 ? complete() : goTo(progress.verse + 1))}
 				>
 					{progress.verse === 31 ? 'Finish chapter' : 'Next verse'}
@@ -88,34 +120,42 @@
 			</div>
 		</div>
 		<p class="reader-smallprint">
-			Narration uses your browser’s synthetic voice. Follow the written text for spelling and
-			punctuation.
+			A continuous recorded track plays the chapter and then its clearly labeled summary. You can
+			lock the screen or switch apps while listening. Interruptions and background behavior depend
+			on your device.
 		</p>
+		<A href={recording.src} download class="text-link audio-download">
+			Download chapter & summary audio
+		</A>
 	{:else}
 		<div class="chapter-summary">
 			<div class="summary-complete"><Check size={18} />Chapter complete</div>
-			<h2>A world brought into order.</h2>
+			<h2>{summary.title}</h2>
 			<p class="summary-label">Chapter overview · Editorial commentary, separate from Scripture</p>
-			<p>
-				Genesis 1 describes God creating the heavens and the earth, bringing light, order, and life
-				into a world described as formless and empty. Across six days, God separates and names,
-				fills the sky, sea, and land, and repeatedly calls creation good.
-			</p>
-			<p>
-				Humanity is created in God’s image, male and female, and given responsibility within
-				creation (Genesis 1:26–28). The chapter closes with God seeing everything he has made as
-				“very good” (Genesis 1:31).
-			</p>
+			<Button
+				variants={['ghost']}
+				class="button-secondary summary-listen"
+				onclick={() =>
+					player.playing
+						? player.pause()
+						: void player.play(
+								player.started && player.phase === 'summary' ? undefined : recording.summaryStart
+							)}
+			>
+				{player.playing ? 'Pause summary' : 'Listen to the summary'}
+			</Button>
+			{#each summary.paragraphs as paragraph}<p>{paragraph}</p>{/each}
 			<div class="reflection-prompt">
 				<BookOpen size={20} />
 				<div>
 					<h3>A question to sit with</h3>
-					<p>What do you notice about the repeated words “God said” and “God saw”?</p>
+					<p>{summary.reflection}</p>
 				</div>
 			</div>
+			<ChapterQuestions />
 			<p class="reader-smallprint">
-				You’ve reached the end of the first-chapter release. Genesis 2 and AI answers to your
-				questions are coming in the next stage.
+				Genesis 1 is the currently available chapter. Genesis 2 and the remaining Bible text will
+				follow.
 			</p>
 			<div class="summary-actions">
 				<Button variants={['ghost']} class="button-secondary" onclick={() => goTo(1)}>
@@ -124,12 +164,13 @@
 			</div>
 		</div>
 	{/if}
-	{#if storageError}<p class="storage-warning" role="status">
-			Your browser couldn’t save your place. Reading still works, but your progress may be lost when
-			you leave.
+	{#if storageError || player.storageError}<p class="storage-warning" role="status">
+			Your browser couldn’t save your place. Reading still works, but progress may be lost when you
+			leave.
 		</p>{/if}
 	<p class="reader-source">
 		Scripture: <A href={chapter.source}>World English Bible, Genesis 1</A> · Public domain. Verse words
-		and punctuation are preserved; source footnotes are not included in narration.
+		and punctuation are preserved; source footnotes are not included in narration. Kokoro Heart is an
+		AI-generated voice.
 	</p>
 </section>
