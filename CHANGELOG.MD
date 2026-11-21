@@ -1,8 +1,9 @@
 # Changes
 
-- Remove model-generation dependencies and scripts so Vercel installs the website without ONNX/CUDA downloads.
-- Pin Node.js to 22.x instead of automatically upgrading to new major versions.
-- Remove follow-up questions, microphone input, AI endpoints, provider configuration, and external-service credentials; keep the app in one Vercel deployment.
-- Default to the standard device voice for chapter and summary reading, with selectable device voices and saved preferences.
-- Retain the Vercel-hosted recording as an optional background-listening choice and remove its concluding reflection question.
-- Update landing-page copy, tests, project instructions, and documentation for a reader-and-summary app requiring no environment variables.
+- Animate elements already visible on page load or navigation after painting their starting state, while respecting reduced motion and keyboard focus.
+- Slow entrance animations to 760 ms and stagger simultaneous reveals by 110 ms, with a capped delay for large groups.
+- Reveal hero text, actions, and the reading preview separately through the root attachment.
+- Delay scroll reveals until elements enter the viewport above a bottom inset equal to 20% of its height.
+- Recalculate the reveal inset when the viewport resizes.
+- Reveal visible pending elements at the end of the page so footer content cannot remain hidden below the trigger line.
+- Extend motion tests to cover initial entrance timing, staggered batches, delayed reveals, viewport resizing, end-of-page content, reduced motion, and listener cleanup.

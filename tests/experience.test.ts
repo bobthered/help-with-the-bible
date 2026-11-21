@@ -147,9 +147,15 @@ test('the root reveal attachment discovers new blocks, preserves focus, and hono
 		mutation: any,
 		preference: () => void = () => {},
 		reduced = false,
-		animations = 0;
+		animations = 0,
+		scrollPosition = 0;
 	const frames: (() => void)[] = [],
-		listeners = new Map();
+		animationOptions: KeyframeAnimationOptions[] = [],
+		listeners = new Map(),
+		windowListeners = new Map();
+	const flushFrames = () => {
+		while (frames.length) frames.shift()!();
+	};
 	const nodes: any[] = [];
 	class ElementMock {
 		dataset: Record<string, string> = {};
@@ -158,7 +164,7 @@ test('the root reveal attachment discovers new blocks, preserves focus, and hono
 			this.top = top;
 		}
 		getBoundingClientRect() {
-			return { top: this.top };
+			return { top: this.top, bottom: this.top + 100 };
 		}
 		contains(target: unknown) {
 			return this === target || (this === root && nodes.includes(target));
@@ -166,8 +172,9 @@ test('the root reveal attachment discovers new blocks, preserves focus, and hono
 		querySelectorAll() {
 			return nodes;
 		}
-		animate() {
+		animate(_keyframes: Keyframe[], options: KeyframeAnimationOptions) {
 			animations++;
+			animationOptions.push(options);
 			return { finished: Promise.resolve(), cancel() {} };
 		}
 		addEventListener(name: string, handler: any) {
@@ -179,16 +186,27 @@ test('the root reveal attachment discovers new blocks, preserves focus, and hono
 	}
 	const root = new ElementMock(0),
 		visible = new ElementMock(50),
+		secondVisible = new ElementMock(250),
 		below = new ElementMock(1500);
-	nodes.push(visible, below);
+	nodes.push(visible, secondVisible, below);
 	const globals = {
-		window: {},
+		window: {
+			get scrollY() {
+				return scrollPosition;
+			},
+			addEventListener(name: string, handler: () => void) {
+				windowListeners.set(name, handler);
+			},
+			removeEventListener(name: string) {
+				windowListeners.delete(name);
+			}
+		},
 		Element: ElementMock,
-		document: { activeElement: null },
+		document: { activeElement: null, scrollingElement: { scrollHeight: 5000 } },
 		innerHeight: 800,
 		IntersectionObserver: class {
-			constructor(callback: any) {
-				intersection = { callback, disconnected: false };
+			constructor(callback: any, options: IntersectionObserverInit) {
+				intersection = { callback, options, disconnected: false };
 			}
 			observe() {}
 			unobserve() {}
@@ -227,29 +245,69 @@ test('the root reveal attachment discovers new blocks, preserves focus, and hono
 			Object.defineProperty(globalThis, key, { value, writable: true, configurable: true });
 		}
 		const cleanup = revealOnScroll(root as unknown as HTMLElement)!;
+		assert.equal(animations, 0); // Wait for a painted starting state.
+		assert.equal(visible.dataset.revealPending, 'true');
+		flushFrames();
+		assert.equal(intersection.options.rootMargin, '0px 0px -160px 0px');
 		assert.equal(visible.dataset.revealPending, undefined);
+		assert.equal(animations, 2); // Initial content enters as one staggered batch.
+		assert.deepEqual(
+			animationOptions.map(({ delay }) => delay),
+			[120, 230]
+		);
+		assert.ok(
+			animationOptions.every(({ duration, fill }) => duration === 760 && fill === 'backwards')
+		);
 		assert.equal(below.dataset.revealPending, 'true');
+		intersection.callback([{ target: below, isIntersecting: false }]);
+		assert.equal(animations, 2);
 		intersection.callback([{ target: below, isIntersecting: true }]);
-		assert.equal(animations, 1);
+		flushFrames();
+		assert.equal(animations, 3);
+		assert.equal(animationOptions[2].delay, 120); // A later batch starts its own sequence.
 		assert.equal(below.dataset.revealPending, undefined);
 		const added = new ElementMock(1600);
 		nodes.push(added);
 		mutation.callback();
-		frames.shift()!();
+		flushFrames();
 		assert.equal(added.dataset.revealPending, 'true');
 		listeners.get('focusin')({ target: added });
 		assert.equal(added.dataset.revealPending, undefined);
-		assert.equal(animations, 1);
-		const other = new ElementMock(2000);
-		nodes.push(other);
+		assert.equal(animations, 3);
+		const footer = new ElementMock(1500),
+			other = new ElementMock(2000);
+		nodes.push(footer, other);
 		mutation.callback();
-		frames.shift()!();
+		flushFrames();
+		footer.top = 750; // Visible, but below the regular 640px trigger line.
+		scrollPosition = 4190;
+		windowListeners.get('scroll')();
+		flushFrames();
+		assert.equal(footer.dataset.revealPending, 'true');
+		scrollPosition = 4200;
+		windowListeners.get('scroll')();
+		flushFrames();
+		assert.equal(footer.dataset.revealPending, undefined);
+		assert.equal(animations, 4);
+		assert.equal(other.dataset.revealPending, 'true'); // Do not reveal offscreen content.
+		scrollPosition = 0;
+		Reflect.set(globalThis, 'innerHeight', 1000);
+		const previousObserver = intersection;
+		windowListeners.get('resize')();
+		flushFrames();
+		assert.equal(previousObserver.disconnected, true);
+		assert.equal(intersection.options.rootMargin, '0px 0px -200px 0px');
 		reduced = true;
 		preference();
 		assert.equal(other.dataset.revealPending, undefined);
+		nodes.push(new ElementMock(50));
+		mutation.callback();
+		flushFrames();
+		assert.equal(animations, 4); // Reduced motion also prevents entrance animations.
 		cleanup();
 		assert.equal(intersection.disconnected, true);
 		assert.equal(mutation.disconnected, true);
+		assert.equal(windowListeners.size, 0);
 	} finally {
 		for (const [key, descriptor] of original)
 			if (descriptor) Object.defineProperty(globalThis, key, descriptor);

@@ -18,7 +18,7 @@ select {
 }
 [data-reveal-pending] {
 	opacity: 0;
-	transform: translateY(12px);
+	transform: translateY(20px);
 }
 .site-root:has(.audio-dock-active) {
 	padding-bottom: calc(135px + env(safe-area-inset-bottom));
