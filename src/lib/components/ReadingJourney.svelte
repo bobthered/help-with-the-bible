@@ -2,11 +2,13 @@
 	import { onMount } from 'svelte';
 	import { A, Bookmark, Check, BookOpen } from '$lib/components';
 	import { initialProgress, loadProgress, PROGRESS_KEY } from '$lib/reading/progress';
+	import { chapterInfo } from '$lib/bible/catalog';
 
 	let progress = $state(initialProgress());
 	let ready = $state(false);
 	let storageAvailable = $state(true);
 	let hasProgress = $state(false);
+	const chapter = $derived(chapterInfo(progress.chapterId)!);
 
 	onMount(() => {
 		function refresh() {
@@ -45,14 +47,14 @@
 		<div class="journey-current">
 			<BookOpen size={24} />
 			<div>
-				<h3>Genesis 1</h3>
+				<h3>{chapter.book} {chapter.chapter}</h3>
 				<p>
 					{!ready
 						? 'Finding your place…'
 						: progress.phase === 'summary'
-							? 'Chapter read · ready to reflect'
+							? 'Chapter complete · ready to continue'
 							: hasProgress
-								? `Continue at verse ${progress.verse} of 31`
+								? `Continue at verse ${progress.verse} of ${chapter.verseCount}`
 								: 'The beginning of something good.'}
 				</p>
 			</div>

@@ -3,6 +3,10 @@
 	import { Button, Select } from '$lib/components';
 	import { AUDIO_CONTEXT, type AudioState } from '$lib/audio/context';
 	const player = getContext<AudioState>(AUDIO_CONTEXT);
+	let { recordedAvailable = true }: { recordedAvailable?: boolean } = $props();
+	$effect(() => {
+		if (!recordedAvailable && player.narrator === 'recorded') player.narrator = 'device';
+	});
 	let voices = $state<SpeechSynthesisVoice[]>([]);
 	onMount(() => {
 		try {
@@ -75,14 +79,19 @@
 			save();
 		}}
 	>
-		<option value="device">Standard device voice</option><option value="recorded">
-			Bundled recording · background listening
+		<option value="device">Standard device voice</option><option
+			value="recorded"
+			disabled={!recordedAvailable}
+		>
+			Bundled recording · Genesis 1 only
 		</option>
 	</Select>
 	<p>
-		{player.narrator === 'device'
-			? 'Uses your device’s standard voice. Keep the app open while listening.'
-			: 'A prerecorded chapter and summary, hosted entirely with this site. No model server or API key is needed.'}
+		{!recordedAvailable
+			? 'Standard device voice is available for every chapter. The background recording currently covers Genesis 1 only.'
+			: player.narrator === 'device'
+				? 'Uses your device’s standard voice. Keep the app open while listening.'
+				: 'A prerecorded chapter and summary, hosted entirely with this site. No model server or API key is needed.'}
 	</p>
 	{#if player.narrator === 'device' && voices.length}<label for="device-voice">
 			Device voice

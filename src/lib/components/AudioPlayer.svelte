@@ -3,15 +3,17 @@
 	import { A, Button } from '$lib/components';
 	import { AUDIO_CONTEXT, type AudioState, positionAt } from '$lib/audio/context';
 	import recording from '$lib/bible/genesis-1-audio.json';
-	import { loadProgress, saveProgress } from '$lib/reading/progress';
+	import { completeChapter, loadProgress, saveProgress } from '$lib/reading/progress';
 	import { createDeviceNarrator } from '$lib/audio/device';
 	import chapter from '$lib/bible/genesis-1.json';
-	import summary from '$lib/bible/genesis-1-summary.json';
+	import { chapterInfo, type Chapter } from '$lib/bible/catalog';
+	import { narrationSegments } from '$lib/audio/segments';
 	const player = getContext<AudioState>(AUDIO_CONTEXT);
 	const key = 'help-with-the-bible:audio:v1';
 	let audio: HTMLAudioElement;
 	let lastSaved = -1;
 	let resumedTime = 0;
+	const spokenChapter = $derived(chapterInfo(player.chapterId));
 
 	onMount(() => {
 		player.duration = recording.duration;
@@ -26,6 +28,7 @@
 				resumedTime = saved.time;
 		} catch {}
 		let pendingSeek: number | null = null;
+		let speechChapter: Chapter = chapter;
 		const device =
 			'speechSynthesis' in window
 				? createDeviceNarrator({
@@ -44,12 +47,16 @@
 							player.phase = phase;
 							try {
 								const current = loadProgress(localStorage);
-								saveProgress(localStorage, {
+								const position = {
 									...current,
+									chapterId: speechChapter.id,
 									verse,
-									phase,
-									completedChapterIds: phase === 'summary' ? ['GEN.1'] : current.completedChapterIds
-								});
+									phase
+								};
+								saveProgress(
+									localStorage,
+									phase === 'summary' ? completeChapter(position) : position
+								);
 								player.storageError = false;
 							} catch {
 								player.storageError = true;
@@ -62,33 +69,21 @@
 			device?.stop();
 			player.speaking = false;
 		};
-		const summarySegments = [
-			{
-				text: `Chapter complete. The following is a chapter summary, separate from Scripture. ${summary.title}`,
-				verse: 31,
-				phase: 'summary' as const
-			},
-			...summary.paragraphs.map((text) => ({ text, verse: 31, phase: 'summary' as const }))
-		];
-		function readDevice(verse: number, summaryOnly = false) {
+		function readDevice(verse: number, summaryOnly = false, selected: Chapter = chapter) {
 			player.pause();
+			player.stopSpeech();
 			player.started = false;
+			speechChapter = selected;
+			player.chapterId = selected.id;
 			player.error = '';
 			if (!device) {
 				player.error =
 					'Device speech is unavailable. You can read the text or use the recorded background audio.';
 				return;
 			}
-			device.read([
-				...(summaryOnly
-					? []
-					: chapter.verses
-							.filter((item) => item.number >= verse)
-							.map((item) => ({ text: item.text, verse: item.number, phase: 'reading' as const }))),
-				...summarySegments
-			]);
+			device.read(narrationSegments(selected, verse, summaryOnly));
 		}
-		player.readDevice = (verse) => readDevice(verse);
+		player.readDevice = (verse, selected) => readDevice(verse, false, selected);
 		player.readDeviceSummary = () => readDevice(31, true);
 		player.currentTime = resumedTime;
 		Object.assign(player, positionAt(resumedTime, recording.cues));
@@ -108,6 +103,8 @@
 		player.play = async (time) => {
 			player.error = '';
 			player.stopSpeech();
+			player.chapterId = 'GEN.1';
+			lastSaved = -1;
 			const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
 			try {
 				if (session) session.type = 'playback';
@@ -122,19 +119,25 @@
 			}
 		};
 		function sync() {
+			// An idle Genesis recording must not overwrite another chapter's device narration.
+			if (!player.started) return;
 			player.currentTime = audio.currentTime;
 			Object.assign(player, positionAt(audio.currentTime, recording.cues));
 			const second = Math.floor(audio.currentTime);
-			if (!player.started || second === lastSaved) return;
+			if (second === lastSaved) return;
 			lastSaved = second;
 			try {
 				const current = loadProgress(localStorage);
-				saveProgress(localStorage, {
+				const position = {
 					...current,
+					chapterId: 'GEN.1',
 					verse: player.verse,
-					phase: player.phase,
-					completedChapterIds: player.phase === 'summary' ? ['GEN.1'] : current.completedChapterIds
-				});
+					phase: player.phase
+				};
+				saveProgress(
+					localStorage,
+					player.phase === 'summary' ? completeChapter(position) : position
+				);
 				localStorage.setItem(
 					key,
 					JSON.stringify({ revision: recording.audioSha256, time: audio.currentTime })
@@ -230,7 +233,9 @@
 
 <div class="audio-dock" class:audio-dock-active={player.started || player.speaking}>
 	{#if player.speaking}<span>
-			Device voice · Genesis 1 {player.phase === 'summary' ? 'summary' : `verse ${player.verse}`}
+			Device voice · {spokenChapter?.book}
+			{spokenChapter?.chapter}
+			{player.phase === 'summary' ? 'complete' : `verse ${player.verse}`}
 		</span><Button variants={['ghost']} class="button-secondary" onclick={player.stopSpeech}>
 			Stop device voice
 		</Button>{/if}

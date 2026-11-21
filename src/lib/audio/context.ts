@@ -1,3 +1,5 @@
+import type { Chapter } from '../bible/catalog.ts';
+
 export const AUDIO_CONTEXT = Symbol('audio');
 export type AudioState = {
 	started: boolean;
@@ -13,10 +15,11 @@ export type AudioState = {
 	error: string;
 	storageError: boolean;
 	speaking: boolean;
+	chapterId: string;
 	play: (time?: number) => Promise<void>;
 	pause: () => void;
 	seek: (time: number) => void;
-	readDevice: (verse: number) => void;
+	readDevice: (verse: number, chapter?: Chapter) => void;
 	readDeviceSummary: () => void;
 	stopSpeech: () => void;
 };
@@ -35,6 +38,7 @@ export function initialAudioState(): AudioState {
 		error: '',
 		storageError: false,
 		speaking: false,
+		chapterId: 'GEN.1',
 		play: async () => {},
 		pause: () => {},
 		seek: () => {},

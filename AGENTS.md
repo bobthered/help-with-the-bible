@@ -21,6 +21,8 @@
 - Scripture must come from a verified, named translation dataset. Preserve verse wording and punctuation; never generate or paraphrase Bible text with an LLM.
 - Keep commentary, summaries, and AI interpretation visibly separate from Scripture. Cite passages and acknowledge differing interpretations when relevant.
 - Use the public-domain World English Bible provisionally until the user chooses a translation.
+- Bundle all 66 books and 1,189 chapters from the publisher's verse-per-line archive. Maintain the catalog and content hashes with `scripts/import-bible.py`; never reconstruct Scripture. Preserve empty publisher verse slots and identify them separately in the UI.
+- Preserve existing v1 reading saves. Validate verse ranges against the selected chapter and retain completed chapters when moving across books. Written summaries and recorded background audio currently cover Genesis 1 only; device speech supports every chapter. Keep these limits explicit until more editorial summaries or recordings are added.
 - Spoken reading must narrate the stored Scripture text. Require an explicit user action to start audio or microphone capture, and preserve typed/read-only fallbacks.
 - Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
 - Use the persistent root native audio player for recorded Scripture and summaries. Keep each chapter and its spoken summary in one track so background playback does not depend on JavaScript starting the next segment.

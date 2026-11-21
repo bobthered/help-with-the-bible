@@ -76,6 +76,8 @@ function harness() {
 				{ path: 'manifest.webmanifest' },
 				{ path: 'icons/icon-192.png' },
 				{ path: 'audio/chapter.mp3' },
+				{ path: 'bible/engwebp/GEN.test.json' },
+				{ path: 'bible/engwebp/REV.test.json' },
 				{ path: 'unrelated.txt' }
 			],
 			prerendered: [{ path: '' }, { path: 'read' }, { path: 'install' }]
@@ -164,6 +166,8 @@ test('the worker installs both reading pages, install guidance, and all bundled 
 		'/read',
 		'/install',
 		'/_app/immutable/chapter.js',
+		'/bible/engwebp/GEN.test.json',
+		'/bible/engwebp/REV.test.json',
 		'/icons/icon-192.png',
 		'/manifest.webmanifest'
 	]) {

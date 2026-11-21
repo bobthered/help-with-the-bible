@@ -21,6 +21,27 @@ select {
 .site-root {
 	min-height: 100svh;
 }
+.chapter-navigation {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+.chapter-navigation label {
+	display: grid;
+	flex: 1 1 140px;
+	gap: 8px;
+}
+.chapter-navigation select {
+	width: 100%;
+	min-height: 44px;
+}
+.chapter-navigation-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
 [data-reveal-pending] {
 	opacity: 0;
 	transform: translateY(20px);

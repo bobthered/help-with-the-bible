@@ -18,7 +18,7 @@
 	<title>Help with the Bible — One chapter at a time</title>
 	<meta
 		name="description"
-		content="Find your way through the Bible, one verse at a time. Read or listen to Genesis, reflect on the chapter, and come back to your saved place."
+		content="Find your way through all 66 books of the Bible, one verse at a time. Read or listen with your device voice and come back to your saved place."
 	/>
 </svelte:head>
 
@@ -68,7 +68,7 @@
 							Move through each chapter, verse by verse. The Bible text stays exactly as written in
 							the selected translation.
 						</p>
-						<span class="feature-note">Try the complete first chapter</span>
+						<span class="feature-note">All 66 books, 1,189 chapters</span>
 					</div>
 				</article>
 				<article>
@@ -108,9 +108,9 @@
 			<Details>
 				<Summary>Which Bible will I be reading?</Summary>
 				<p>
-					The first chapter uses the World English Bible, a public-domain English translation. The
-					translation is always named beside the text. More translation options can be added as the
-					reader grows.
+					All 66 books use the World English Bible, a public-domain English translation. The
+					translation is always named beside the text. This edition includes the Old and New
+					Testaments, without the Deuterocanon/Apocrypha.
 				</p>
 			</Details>
 			<Details>
@@ -132,9 +132,9 @@
 			<Details>
 				<Summary>Is the entire Bible available yet?</Summary>
 				<p>
-					This first release includes Genesis 1 and its chapter overview. The full journey will
-					follow the Bible in order, from Genesis to Revelation. The remaining chapters are the next
-					stage.
+					Yes. Read or listen with the standard device voice through all 1,189 chapters, from
+					Genesis to Revelation. Choose any book and chapter, or continue in order. Written chapter
+					overviews and the optional background recording currently cover Genesis 1 only.
 				</p>
 			</Details>
 		</div>

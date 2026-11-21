@@ -1,0 +1,2 @@
+# Content hashes must survive Windows and Linux checkouts byte-for-byte.
+/static/bible/engwebp/*.json text eol=lf

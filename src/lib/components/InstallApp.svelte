@@ -23,7 +23,7 @@
 			</Button>{:else}<p>Use your browser’s install option, or follow the steps below.</p>{/if}
 		<p class="install-offline-state" role="status">
 			{pwa.offlineReady
-				? 'Ready for offline reading: Genesis 1 and its chapter overview.'
+				? 'Ready for offline reading: all 66 books and 1,189 chapters.'
 				: 'Connect once and keep the app open while offline reading is prepared.'}
 		</p>
 	</div>
@@ -64,14 +64,15 @@
 	<div class="install-details">
 		<h2>Your place stays with you on this device.</h2>
 		<p>
-			Offline reading includes Genesis 1, its summary, and the optional bundled recording. Standard
-			device voices may need internet, depending on the voice. No external AI service is used.
+			Offline reading includes the entire 66-book Bible, plus the Genesis 1 summary and recording.
+			Standard device voices may need internet, depending on the voice. No external AI service is
+			used.
 		</p>
 		<p>
 			Reading progress is stored locally, without an account or device sync. Some platforms keep the
 			installed app’s storage separate from browser tabs, so install before beginning a long reading
 			journey. Clearing the app’s data can remove your place.
 		</p>
-		<A href="/read" class="button-primary">Continue to Genesis</A>
+		<A href="/read" class="button-primary">Continue reading</A>
 	</div>
 </section>

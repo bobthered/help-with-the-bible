@@ -83,6 +83,7 @@ for (const phase of ['install', 'activate']) {
 }
 online = false;
 const recording = JSON.parse(readFileSync('src/lib/bible/genesis-1-audio.json', 'utf8'));
+const catalog = JSON.parse(readFileSync('src/lib/bible/catalog.json', 'utf8'));
 for (const path of [
 	'/',
 	'/read',
@@ -92,7 +93,8 @@ for (const path of [
 	'/icons/icon-512.png',
 	'/icons/maskable-512.png',
 	'/icons/apple-touch-icon.png',
-	recording.src
+	recording.src,
+	...catalog.books.map((book) => book.src)
 ]) {
 	const request = new BrowserRequest(path);
 	Object.defineProperty(request, 'mode', { value: path.includes('.') ? 'cors' : 'navigate' });
@@ -130,5 +132,5 @@ assert.ok(
 	'Scripture was not included in the offline bundle'
 );
 console.log(
-	`PWA build verified: ${entries.size} real resources precached; pages, icons, Scripture, and ranged narration available with the network disabled.`
+	`PWA build verified: ${entries.size} real resources precached; all 66 Bible books, pages, icons, and ranged narration available with the network disabled.`
 );

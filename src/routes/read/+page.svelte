@@ -3,9 +3,9 @@
 </script>
 
 <svelte:head>
-	<title>Genesis 1 — Help with the Bible</title><meta
+	<meta
 		name="description"
-		content="Read or listen to Genesis 1 in the World English Bible, one verse at a time. Your reading place is saved in this browser."
+		content="Read or listen to all 66 books of the World English Bible, one verse at a time. Your reading place is saved in this browser."
 	/>
 </svelte:head>
 

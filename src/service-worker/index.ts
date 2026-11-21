@@ -16,6 +16,7 @@ const paths = [
 					file.path === 'manifest.webmanifest' ||
 					file.path === 'offline.html' ||
 					file.path.startsWith('icons/') ||
+					file.path.startsWith('bible/engwebp/') ||
 					file.path.startsWith('audio/')
 			)
 			.map((file) => resourcePath(file.path)),
