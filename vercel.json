@@ -1,0 +1,13 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"headers": [
+		{
+			"source": "/service-worker.js",
+			"headers": [{ "key": "Cache-Control", "value": "no-cache, max-age=0, must-revalidate" }]
+		},
+		{
+			"source": "/manifest.webmanifest",
+			"headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+		}
+	]
+}

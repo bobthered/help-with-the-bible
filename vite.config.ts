@@ -11,6 +11,7 @@ export default defineConfig({
 	plugins: [
 		tailwindcss(),
 		sveltekit({
+			serviceWorker: { register: false },
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) =>

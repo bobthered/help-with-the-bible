@@ -1,10 +1,10 @@
 # Changes
 
-- Build an editorial landing page with the gold, black, and white palette, Scripture preview, reading journey, feature explanations, and FAQs.
-- Add a working Genesis 1 reader with verse-by-verse navigation, persistent browser progress, and a chapter overview labeled as commentary.
-- Import all 31 Genesis 1 verses from the public-domain World English Bible, recording source provenance and providing a reproducible import script.
-- Add optional browser narration of stored verse text, synchronized reading position, stop controls, and unsupported-browser and storage-error fallbacks.
-- Add shared header, footer, book mark, and accessible theme control through the component barrel.
-- Add tests for progress validation, storage failures, resume behavior, and Scripture dataset integrity.
-- Document the recommended Vercel/OpenAI architecture, full-Bible import, grounded questions, and staged voice support; distinguish planned features from available behavior.
-- Update project instructions for exact Scripture, local progress, and separate analysis.
+- Make the site installable on desktop, iOS, and Android with a standalone web manifest, PNG app icons, Android maskable icon, and Apple touch metadata.
+- Add a native SvelteKit service worker to cache the landing page, Genesis reader, installation guidance, and bundled Scripture for offline use.
+- Prerender the three public pages and provide an offline fallback without caching question APIs, uploads, authenticated requests, or external resources.
+- Add connection notices and an explicit app-update flow that preserves reading progress and retains the previous deployment for open tabs.
+- Add an installation page with native prompts where supported and manual instructions for iPhone, iPad, Android, and desktop browsers.
+- Add safe-area spacing, theme-aware browser chrome, and Vercel cache headers for worker and manifest updates.
+- Add reproducible app-icon generation, service-worker type checks, PWA lifecycle tests, and verification of the emitted offline build.
+- Document installation, offline limits, device storage behavior, and platform verification steps; update project PWA instructions.

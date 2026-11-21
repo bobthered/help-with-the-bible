@@ -10,6 +10,7 @@
 		</span>
 	</A>
 	<nav aria-label="Main navigation">
+		<A href="/install" class="nav-link">Install app</A>
 		<A href="/#experience" class="nav-link">The experience</A>
 		<A href="/#your-place" class="nav-link">Your place</A>
 		<ThemeToggle />

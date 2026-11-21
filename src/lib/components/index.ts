@@ -7,6 +7,8 @@ export { default as ScripturePreview } from './ScripturePreview.svelte';
 export { default as ReadingJourney } from './ReadingJourney.svelte';
 export { default as ReadAloud } from './ReadAloud.svelte';
 export { default as ChapterReader } from './ChapterReader.svelte';
+export { default as PwaManager } from './PwaManager.svelte';
+export { default as InstallApp } from './InstallApp.svelte';
 export {
 	BookOpen,
 	Bookmark,

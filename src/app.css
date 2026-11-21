@@ -95,6 +95,8 @@ html[data-color='gold'] {
 
 	body {
 		margin: 0;
+		padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+			env(safe-area-inset-left);
 		background: var(--surface);
 		color: var(--foreground);
 		font-family: system-ui, sans-serif;
@@ -109,6 +111,137 @@ html[data-color='gold'] {
 	::selection {
 		background: var(--color-primary-200);
 		color: #0a0a0a;
+	}
+}
+
+.pwa-notice {
+	position: sticky;
+	top: env(safe-area-inset-top, 0px);
+	z-index: 50;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 12px 24px;
+	padding: 12px 20px;
+	background: var(--surface-soft);
+	color: var(--foreground);
+	border-bottom: 1px solid var(--border);
+	font-size: 0.8125rem;
+	line-height: 1.6;
+}
+.pwa-notice .button-primary {
+	min-height: 44px;
+	padding: 9px 18px;
+}
+.install-page {
+	max-width: 1000px;
+	padding-block: 70px 90px;
+}
+.install-heading {
+	max-width: 640px;
+	margin: auto;
+	text-align: center;
+}
+.install-mark {
+	display: inline-flex;
+	width: 72px;
+	height: 72px;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 25px;
+	border-radius: 16px;
+	background: #0a0a0a;
+	color: #c9a227;
+}
+.install-mark svg {
+	width: 42px;
+	height: 42px;
+}
+.install-heading h1 {
+	margin-top: 18px;
+	font-family: var(--serif);
+	font-size: clamp(2.5rem, 5vw, 3.75rem);
+	line-height: 1.1;
+	letter-spacing: -0.035em;
+	font-weight: 400;
+}
+.install-heading > p:last-child {
+	margin-top: 24px;
+	font-size: 1.0625rem;
+	line-height: 1.85;
+	color: var(--muted);
+}
+.install-action {
+	text-align: center;
+	margin-block: 30px 55px;
+	font-size: 0.9375rem;
+}
+.install-confirmation {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	color: var(--accent);
+}
+.install-offline-state {
+	margin-top: 16px;
+	font-size: 0.8125rem;
+	color: var(--muted);
+	line-height: 1.7;
+}
+.install-platforms {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 30px;
+	border-block: 1px solid var(--border);
+	padding-block: 30px;
+}
+.install-platforms h2,
+.install-details h2 {
+	font-family: var(--serif);
+	font-weight: 400;
+	font-size: 1.5rem;
+}
+.install-platforms ol {
+	list-style: decimal;
+	padding-left: 20px;
+	margin-top: 18px;
+}
+.install-platforms li {
+	padding-left: 4px;
+	margin-top: 12px;
+	color: var(--muted);
+	font-size: 0.875rem;
+	line-height: 1.8;
+}
+.install-platforms li::marker {
+	color: var(--accent);
+}
+.install-platforms strong {
+	font-weight: 500;
+	color: var(--foreground);
+}
+.install-details {
+	max-width: 680px;
+	margin: 40px auto 0;
+}
+.install-details p {
+	margin-top: 15px;
+	line-height: 1.8;
+	color: var(--muted);
+	font-size: 0.9375rem;
+}
+.install-details .button-primary {
+	margin-top: 25px;
+}
+@media (max-width: 760px) {
+	.install-page {
+		padding-block: 45px 60px;
+	}
+	.install-platforms {
+		grid-template-columns: 1fr;
+		gap: 28px;
 	}
 }
 

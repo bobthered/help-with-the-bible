@@ -12,6 +12,9 @@
 		isDark = !isDark;
 		const mode = isDark ? 'dark' : 'light';
 		document.documentElement.dataset.theme = mode;
+		document
+			.querySelector('meta[name="theme-color"]')
+			?.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
 		try {
 			localStorage.setItem('theme', mode);
 		} catch {

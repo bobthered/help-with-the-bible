@@ -24,6 +24,13 @@
 - Spoken reading must narrate the stored Scripture text. Require an explicit user action to start audio or microphone capture, and preserve typed/read-only fallbacks.
 - Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
 
+## Progressive web app
+
+- Keep the app installable on desktop, iOS, and Android with a web manifest, PNG and maskable icons, Apple touch metadata, and mobile safe-area spacing.
+- Maintain the native SvelteKit 3 worker in `src/service-worker`, with its separate TypeScript project. Cache only build-known public resources and prerendered pages; never cache question APIs, uploads, or authenticated responses.
+- Make updates opt-in during an active reading session and preserve local reading progress. Keep offline support limited to bundled or explicitly downloaded content; AI requests require a connection.
+- Run `npm run check`, `npm test`, and `npm run verify:pwa` after a production build when changing PWA behavior. Actual-device installation and audio behavior still require browser/device QA.
+
 ## Components
 
 - Keep all project components in `src/lib/components` (the `/lib/components` component directory).
