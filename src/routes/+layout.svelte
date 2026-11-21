@@ -1,10 +1,12 @@
 <script lang="ts">
 	import '../app.css';
+	import Lenis from 'lenis';
 	import { theme } from 'sveltewind/theme';
 	import { minimal } from 'sveltewind/themes';
 	import favicon from '#lib/assets/favicon.svg';
 	import type { LayoutProps } from './$types';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { PwaManager, AudioPlayer } from '$lib/components';
 	import { AUDIO_CONTEXT, initialAudioState } from '$lib/audio/context';
 	import { revealOnScroll } from '$lib/attachments/reveal';
@@ -18,6 +20,30 @@
 	setContext(AUDIO_CONTEXT, audio);
 
 	theme.set.theme(structuredClone(minimal));
+
+	let scrolling: Lenis | undefined;
+	onMount(() => {
+		scrolling = new Lenis({
+			autoRaf: true,
+			smoothWheel: true,
+			lerp: 0.085,
+			syncTouch: false,
+			anchors: true,
+			allowNestedScroll: true,
+			respectReducedMotion: true
+		});
+		return () => {
+			scrolling?.destroy();
+			scrolling = undefined;
+		};
+	});
+	beforeNavigate(({ from, to }) => {
+		// End the old page's momentum while SvelteKit handles the new scroll position.
+		if (from?.url.pathname !== to?.url.pathname || from?.url.search !== to?.url.search) {
+			if (scrolling) scrolling.scrollTo(scrolling.actualScroll, { immediate: true });
+		}
+	});
+	afterNavigate(() => scrolling?.resize());
 </script>
 
 <svelte:head>

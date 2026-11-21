@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'lenis/dist/lenis.css';
 @import 'sveltewind/themes/palettes.css';
 @source '../node_modules/sveltewind/dist';
 
@@ -7,6 +8,10 @@
 html,
 body {
 	touch-action: pan-x pan-y;
+}
+/* Lenis owns easing while mounted; Tailwind remains the native fallback. */
+html.lenis {
+	scroll-behavior: auto;
 }
 input,
 textarea,
