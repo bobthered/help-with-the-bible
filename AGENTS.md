@@ -1,13 +1,25 @@
+## Project Configuration
+
+- **Language**: TypeScript
+- **Package Manager**: npm
+- **Add-ons**: none
+
+---
+
 # Project instructions
 
 - Build this project with SvelteKit 3.
 - Target Vercel for deployment.
 - Use the npm package `sveltewind` for UI components.
+- Use TypeScript, Tailwind CSS 4, and Prettier.
+- Keep SvelteKit configuration in `vite.config.ts`, using `@sveltejs/adapter-vercel`.
+- Use black/white light and dark surfaces with gold as the primary color. Maintain the palette in `src/app.css`.
 
 ## Components
 
 - Keep all project components in `src/lib/components` (the `/lib/components` component directory).
 - Import components through `$lib/components` rather than directly from `sveltewind/components`.
+- Preserve the explicit `$lib` alias in Vite and TypeScript; SvelteKit 3 uses `#lib` by default.
 - Maintain `src/lib/components/index.ts` as the component barrel. It must expose all Sveltewind components with this exact export:
 
   ```ts
