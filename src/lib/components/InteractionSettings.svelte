@@ -8,12 +8,18 @@
 		if (!recordedAvailable && player.narrator === 'recorded') player.narrator = 'device';
 	});
 	let voices = $state<SpeechSynthesisVoice[]>([]);
+	let sleepMinutes = $state('0');
+	$effect(() => {
+		if (player.sleepEndsAt === null) sleepMinutes = '0';
+	});
 	onMount(() => {
 		try {
 			const saved = JSON.parse(localStorage.getItem('help-with-the-bible:interaction:v1') ?? '{}');
 			if (['text', 'voice'].includes(saved.mode)) player.mode = saved.mode;
 			if (['device', 'recorded'].includes(saved.narrator)) player.narrator = saved.narrator;
 			if (typeof saved.deviceVoice === 'string') player.deviceVoice = saved.deviceVoice;
+			if (Number.isFinite(saved.rate) && saved.rate >= 0.5 && saved.rate <= 2)
+				player.rate = saved.rate;
 		} catch {}
 		const refresh = () => {
 			voices =
@@ -35,7 +41,8 @@
 				JSON.stringify({
 					mode: player.mode,
 					narrator: player.narrator,
-					deviceVoice: player.deviceVoice
+					deviceVoice: player.deviceVoice,
+					rate: player.rate
 				})
 			);
 		} catch {}
@@ -83,16 +90,51 @@
 			value="recorded"
 			disabled={!recordedAvailable}
 		>
-			Bundled recording · Genesis 1 only
+			Recorded chapter & overview · background listening
 		</option>
 	</Select>
 	<p>
 		{!recordedAvailable
-			? 'Standard device voice is available for every chapter. The background recording currently covers Genesis 1 only.'
+			? 'Standard device voice is available while this chapter recording is unavailable.'
 			: player.narrator === 'device'
 				? 'Uses your device’s standard voice. Keep the app open while listening.'
-				: 'A prerecorded chapter and summary, hosted entirely with this site. No model server or API key is needed.'}
+				: 'A prerecorded chapter and overview, hosted with this site. Keep playing when the screen locks, subject to your device and interruptions.'}
 	</p>
+	<label for="playback-rate">
+		Playback speed<Select
+			id="playback-rate"
+			bind:value={player.rate}
+			onchange={(event) => {
+				player.rate = Number(event.currentTarget.value);
+				save();
+			}}
+		>
+			<option value={0.5}>0.5×</option><option value={0.75}>0.75×</option><option value={1}>
+				1×
+			</option><option value={1.25}>1.25×</option><option value={1.5}>1.5×</option><option
+				value={2}
+			>
+				2×
+			</option>
+		</Select>
+	</label>
+	<label for="sleep-timer">
+		Sleep timer<Select
+			id="sleep-timer"
+			bind:value={sleepMinutes}
+			onchange={(event) => player.setSleepTimer(Number(event.currentTarget.value))}
+		>
+			<option value="0">Off</option><option value="5">5 minutes</option><option value="15">
+				15 minutes
+			</option><option value="30">30 minutes</option><option value="60">60 minutes</option>
+		</Select>
+	</label>
+	{#if player.sleepEndsAt}<p role="status">
+			Playback will stop around {new Date(player.sleepEndsAt).toLocaleTimeString([], {
+				hour: 'numeric',
+				minute: '2-digit'
+			})}. Device suspension may delay the timer.
+		</p>{/if}
 	{#if player.narrator === 'device' && voices.length}<label for="device-voice">
 			Device voice
 		</label><Select

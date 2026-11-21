@@ -4,6 +4,7 @@ export function createDeviceNarrator(options: {
 	engine: Pick<SpeechSynthesis, 'speak' | 'cancel' | 'getVoices'>;
 	createUtterance: (text: string) => SpeechSynthesisUtterance;
 	voice: () => string;
+	rate?: () => number;
 	onposition: (verse: number, phase: 'reading' | 'summary') => void;
 	onstate: (speaking: boolean) => void;
 	onerror: () => void;
@@ -29,7 +30,7 @@ export function createDeviceNarrator(options: {
 			const segment = segments[index];
 			active = options.createUtterance(segment.text);
 			active.lang = 'en-US';
-			active.rate = 0.95;
+			active.rate = options.rate?.() ?? 0.95;
 			const voices = options.engine.getVoices();
 			active.voice =
 				voices.find((voice) => voice.voiceURI === options.voice()) ??

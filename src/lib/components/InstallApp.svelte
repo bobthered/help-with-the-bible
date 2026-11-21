@@ -64,9 +64,10 @@
 	<div class="install-details">
 		<h2>Your place stays with you on this device.</h2>
 		<p>
-			Offline reading includes the entire 66-book Bible, plus the Genesis 1 summary and recording.
-			Standard device voices may need internet, depending on the voice. No external AI service is
-			used.
+			Offline reading includes the entire 66-book Bible and chapter overviews. For background audio,
+			download the chapters you want from the reader before disconnecting. The Genesis 1 recording
+			is included in initial setup. Standard device voices may need internet, depending on the
+			voice.
 		</p>
 		<p>
 			Reading progress is stored locally, without an account or device sync. Some platforms keep the

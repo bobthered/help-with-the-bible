@@ -3,6 +3,7 @@ import { version } from '$app/env';
 import { assets, immutable, prerendered } from '$app/manifest';
 import { CACHE_PREFIX, canHandleRequest, obsoleteCaches } from '../lib/pwa/cache-policy';
 import { audioRangeResponse } from '../lib/pwa/range';
+import { DOWNLOAD_CACHE } from '../lib/audio/cache';
 
 const CACHE = `${CACHE_PREFIX}${version}`;
 const resourcePath = (path: string) =>
@@ -17,13 +18,19 @@ const paths = [
 					file.path === 'offline.html' ||
 					file.path.startsWith('icons/') ||
 					file.path.startsWith('bible/engwebp/') ||
-					file.path.startsWith('audio/')
+					file.path.startsWith('summaries/') ||
+					(file.path.startsWith('audio/') && !file.path.startsWith('audio/chapters/'))
 			)
 			.map((file) => resourcePath(file.path)),
 		...prerendered.map((page) => resourcePath(page.path))
 	])
 ];
 const precached = new Set<string>(paths);
+const recordings = new Set<string>(
+	assets
+		.filter((file) => file.path.startsWith('audio/chapters/'))
+		.map((file) => resourcePath(file.path))
+);
 const offlinePage = resourcePath('offline.html');
 
 self.addEventListener('install', (event) => {
@@ -61,8 +68,9 @@ self.addEventListener('fetch', (event) => {
 	const { request } = event;
 	const url = new URL(request.url);
 	const known = precached.has(url.pathname);
+	const downloadable = recordings.has(url.pathname);
 	const rangedAudio =
-		known &&
+		(known || downloadable) &&
 		url.pathname.startsWith(resourcePath('audio/')) &&
 		request.headers.has('range') &&
 		request.method === 'GET' &&
@@ -70,11 +78,18 @@ self.addEventListener('fetch', (event) => {
 		!request.headers.has('authorization');
 	if (!canHandleRequest(request, self.location.origin) && !rangedAudio) return;
 	const oldBuildAsset = url.pathname.startsWith(resourcePath('_app/immutable/'));
-	if (!known && !oldBuildAsset && request.mode !== 'navigate') return;
+	if (!known && !downloadable && !oldBuildAsset && request.mode !== 'navigate') return;
 
 	event.respondWith(
 		(async () => {
 			const cache = await caches.open(CACHE);
+			if (downloadable) {
+				const downloaded = await (await caches.open(DOWNLOAD_CACHE)).match(url.pathname);
+				if (downloaded)
+					return rangedAudio
+						? audioRangeResponse(downloaded, request.headers.get('range')!)
+						: downloaded;
+			}
 			if (known) {
 				// Keep HTML and its matching JS from one deployment until an update is accepted.
 				const cached = await cache.match(url.pathname);

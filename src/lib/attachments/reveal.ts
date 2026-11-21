@@ -12,7 +12,7 @@ export const revealOnScroll: Attachment<HTMLElement> = (root) => {
 	let endFrame = 0;
 	let revealFrame = 0;
 	const selector =
-		'header.site-header, footer.site-footer, main > section:not(.hero), main .hero-copy > *, main .hero-reading, main .experience-steps > article, main .faq-list > details, main .journey-card, main .chapter-summary, main .verse-sheet, main .install-platforms > section';
+		'header.site-header, footer.site-footer, main > section:not(.hero), main .hero-copy > *, main .hero-reading, main .experience-steps > article, main .faq-list > details, main .journey-card, main .chapter-summary, main .verse-sheet, main .study-panel, main .audio-download-panel, main .install-platforms > section';
 	function reveal(element: HTMLElement, animate = true, delay = 0) {
 		queued.delete(element);
 		pending.delete(element);

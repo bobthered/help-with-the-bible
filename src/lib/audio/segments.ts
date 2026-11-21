@@ -5,8 +5,14 @@ export function chapterSummary(id: string) {
 	return id === 'GEN.1' ? summary : undefined;
 }
 
-export function narrationSegments(chapter: Chapter, start: number, summaryOnly = false) {
-	const summary = chapterSummary(chapter.id);
+export type SpokenSummary = { title: string; paragraphs: string[]; attribution?: string };
+export function narrationSegments(
+	chapter: Chapter,
+	start: number,
+	summaryOnly = false,
+	overview?: SpokenSummary
+) {
+	const summary: SpokenSummary | undefined = overview ?? chapterSummary(chapter.id);
 	const last = chapter.verses.length;
 	return [
 		...(summaryOnly
@@ -16,7 +22,7 @@ export function narrationSegments(chapter: Chapter, start: number, summaryOnly =
 					.map((verse) => ({ text: verse.text, verse: verse.number, phase: 'reading' as const }))),
 		{
 			text: summary
-				? `Chapter complete. The following is a chapter summary, separate from Scripture. ${summary.title}`
+				? `Chapter complete. The following is a chapter summary, separate from Scripture. ${summary.attribution ?? ''} ${summary.title}`
 				: `${chapter.book} ${chapter.chapter} complete.`,
 			verse: last,
 			phase: 'summary' as const

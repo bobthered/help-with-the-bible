@@ -87,8 +87,8 @@
 					<div>
 						<h3>Make room for understanding.</h3>
 						<p>
-							Finish Genesis 1 with a short overview, clearly separated from Scripture. Read it at
-							your own pace or have the summary spoken to you.
+							Finish each chapter with an attributed outline, book context, and passages to revisit,
+							clearly separated from Scripture. Read the overview or hear it spoken.
 						</p>
 						<span class="feature-note"> Written and spoken chapter overview </span>
 					</div>
@@ -118,23 +118,26 @@
 				<p>
 					Your current verse and completed chapters are kept in this browser using local storage.
 					There’s no account and no automatic sync between devices. Clearing your browser’s site
-					data clears your place.
+					data clears your place. Export a backup from the reader to keep your progress, bookmarks,
+					highlights, notes, and preferences or move them to another device.
 				</p>
 			</Details>
 			<Details>
 				<Summary>Can I listen with the screen locked?</Summary>
 				<p>
 					Standard device speech works best with the app open. For background listening, select the
-					bundled chapter-and-summary recording. It is hosted with this site and needs no AI
-					account. Playback behavior can vary with your device and interruptions.
+					recorded chapter-and-overview option, available for every chapter. Download a track in the
+					reader before going offline. Playback behavior can vary with your device and
+					interruptions.
 				</p>
 			</Details>
 			<Details>
 				<Summary>Is the entire Bible available yet?</Summary>
 				<p>
 					Yes. Read or listen with the standard device voice through all 1,189 chapters, from
-					Genesis to Revelation. Choose any book and chapter, or continue in order. Written chapter
-					overviews and the optional background recording currently cover Genesis 1 only.
+					Genesis to Revelation. Choose any book and chapter, read a whole chapter or one verse at a
+					time, search Scripture, and continue in order. Every chapter includes an overview and an
+					optional recording with spoken commentary clearly separated from Scripture.
 				</p>
 			</Details>
 		</div>

@@ -46,6 +46,11 @@ const cache = {
 	put: async (request, response) => entries.set(key(request), response.clone())
 };
 const cacheNames = new Set();
+const downloadEntries = new Map();
+const downloadCache = {
+	match: async (request) => downloadEntries.get(key(request))?.clone(),
+	put: async (request, response) => downloadEntries.set(key(request), response.clone())
+};
 const scope = {
 	location: new URL(`${origin}/service-worker.js`),
 	registration: { scope: `${origin}/` },
@@ -64,7 +69,7 @@ runInNewContext(readFileSync('.svelte-kit/output/client/service-worker.js', 'utf
 	caches: {
 		open: async (name) => {
 			cacheNames.add(name);
-			return cache;
+			return name === 'help-with-the-bible:audio-downloads:v1' ? downloadCache : cache;
 		},
 		keys: async () => [...cacheNames],
 		delete: async (name) => cacheNames.delete(name)
@@ -84,6 +89,7 @@ for (const phase of ['install', 'activate']) {
 online = false;
 const recording = JSON.parse(readFileSync('src/lib/bible/genesis-1-audio.json', 'utf8'));
 const catalog = JSON.parse(readFileSync('src/lib/bible/catalog.json', 'utf8'));
+const summaries = JSON.parse(readFileSync('src/lib/bible/summary-catalog.json', 'utf8'));
 for (const path of [
 	'/',
 	'/read',
@@ -94,7 +100,9 @@ for (const path of [
 	'/icons/maskable-512.png',
 	'/icons/apple-touch-icon.png',
 	recording.src,
-	...catalog.books.map((book) => book.src)
+	...catalog.books.map((book) => book.src),
+	...Object.values(summaries.books).map((book) => book.src),
+	...catalog.books.map((book) => `/audio/metadata/${book.id}.json`)
 ]) {
 	const request = new BrowserRequest(path);
 	Object.defineProperty(request, 'mode', { value: path.includes('.') ? 'cors' : 'navigate' });
@@ -120,6 +128,23 @@ handlers.get('fetch')({
 const rangedResponse = await rangedResult;
 assert.equal(rangedResponse?.status, 206, 'Cached audio must support Safari byte-range requests');
 assert.equal((await rangedResponse.arrayBuffer()).byteLength, 1024);
+const genesisTracks = JSON.parse(readFileSync('static/audio/metadata/GEN.json', 'utf8'));
+const optional = genesisTracks['GEN.2'];
+assert.ok(!entries.has(key(optional.src)), 'Optional chapter audio must not be precached');
+const bytes = readFileSync(`static${optional.src}`);
+await downloadCache.put(
+	optional.src,
+	new Response(bytes, { headers: { 'Content-Type': 'audio/mp4' } })
+);
+const optionalRequest = new BrowserRequest(optional.src, { headers: { Range: 'bytes=0-1023' } });
+let optionalResult;
+handlers.get('fetch')({
+	request: optionalRequest,
+	respondWith: (response) => (optionalResult = response)
+});
+const optionalResponse = await optionalResult;
+assert.equal(optionalResponse.status, 206, 'Downloaded chapter must support offline ranges');
+assert.deepEqual(Buffer.from(await optionalResponse.arrayBuffer()), bytes.subarray(0, 1024));
 const scriptBodies = await Promise.all(
 	[...entries.entries()]
 		.filter(([path]) => path.endsWith('.js'))
@@ -132,5 +157,5 @@ assert.ok(
 	'Scripture was not included in the offline bundle'
 );
 console.log(
-	`PWA build verified: ${entries.size} real resources precached; all 66 Bible books, pages, icons, and ranged narration available with the network disabled.`
+	`PWA build verified: ${entries.size} resources precached; all Scripture, summaries, and recording metadata work offline. Optional chapter audio stays opt-in and supports offline byte ranges.`
 );

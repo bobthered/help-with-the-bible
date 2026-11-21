@@ -11,7 +11,7 @@
 		"#lib/*": "./src/lib/*"
 	},
 	"scripts": {
-		"test": "node --experimental-strip-types --test tests/reading.test.ts tests/pwa.test.ts tests/experience.test.ts",
+		"test": "node --experimental-strip-types --test tests/reading.test.ts tests/pwa.test.ts tests/experience.test.ts tests/study.test.ts",
 		"icons": "node scripts/generate-pwa-icons.mjs",
 		"verify:pwa": "node scripts/verify-pwa-build.mjs",
 		"dev": "vite dev",

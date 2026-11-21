@@ -1,67 +1,71 @@
 <script lang="ts">
-	import { getContext, onMount } from 'svelte';
+	import { getContext, onMount, tick } from 'svelte';
 	import { A, Button } from '$lib/components';
 	import { AUDIO_CONTEXT, type AudioState, positionAt } from '$lib/audio/context';
-	import recording from '$lib/bible/genesis-1-audio.json';
-	import { completeChapter, loadProgress, saveProgress } from '$lib/reading/progress';
-	import { createDeviceNarrator } from '$lib/audio/device';
-	import chapter from '$lib/bible/genesis-1.json';
+	import original from '$lib/bible/genesis-1-audio.json';
+	import genesis from '$lib/bible/genesis-1.json';
 	import { chapterInfo, type Chapter } from '$lib/bible/catalog';
-	import { narrationSegments } from '$lib/audio/segments';
+	import { narrationSegments, type SpokenSummary } from '$lib/audio/segments';
+	import { createDeviceNarrator } from '$lib/audio/device';
+	import { loadRecording, type Recording } from '$lib/audio/recordings';
+	import { completeChapter, loadProgress, saveProgress } from '$lib/reading/progress';
 	const player = getContext<AudioState>(AUDIO_CONTEXT);
-	const key = 'help-with-the-bible:audio:v1';
+	const key = 'help-with-the-bible:audio:v2';
 	let audio: HTMLAudioElement;
-	let lastSaved = -1;
-	let resumedTime = 0;
+	let track = $state<Recording>({
+		...original,
+		voiceLabel: 'Kokoro Heart · synthetic voice',
+		lastVerse: 31
+	});
+	let trackId = $state('GEN.1');
 	const spokenChapter = $derived(chapterInfo(player.chapterId));
+	const nativeChapter = $derived(chapterInfo(trackId));
+	$effect(() => {
+		if (audio) audio.playbackRate = player.rate;
+	});
 
 	onMount(() => {
-		player.duration = recording.duration;
+		let generation = 0,
+			lastSaved = -1,
+			pendingSeek: number | null = null;
+		let speechChapter: Chapter = genesis;
+		let remembered: { chapterId: string; hash: string; time: number } | null = null;
 		try {
 			const saved = JSON.parse(localStorage.getItem(key) ?? 'null');
 			if (
-				saved?.revision === recording.audioSha256 &&
+				typeof saved?.chapterId === 'string' &&
+				chapterInfo(saved.chapterId) &&
+				typeof saved.hash === 'string' &&
 				Number.isFinite(saved.time) &&
-				saved.time >= 0 &&
-				saved.time < recording.duration
+				saved.time >= 0
 			)
-				resumedTime = saved.time;
+				remembered = saved;
 		} catch {}
-		let pendingSeek: number | null = null;
-		let speechChapter: Chapter = chapter;
+		function savePosition(id: string, verse: number, phase: 'reading' | 'summary') {
+			try {
+				const current = loadProgress(localStorage);
+				const position = { ...current, chapterId: id, verse, phase };
+				saveProgress(localStorage, phase === 'summary' ? completeChapter(position) : position);
+				player.storageError = false;
+			} catch {
+				player.storageError = true;
+			}
+			window.dispatchEvent(new Event('reading-progress'));
+		}
 		const device =
 			'speechSynthesis' in window
 				? createDeviceNarrator({
 						engine: speechSynthesis,
 						createUtterance: (text) => new SpeechSynthesisUtterance(text),
 						voice: () => player.deviceVoice,
-						onstate: (speaking) => {
-							player.speaking = speaking;
-						},
-						onerror: () => {
-							player.error =
-								'Device speech stopped. Try again or use the recorded background audio.';
-						},
+						rate: () => player.rate,
+						onstate: (speaking) => (player.speaking = speaking),
+						onerror: () =>
+							(player.error = 'Device speech stopped. Try again, or select the recorded chapter.'),
 						onposition: (verse, phase) => {
 							player.verse = verse;
 							player.phase = phase;
-							try {
-								const current = loadProgress(localStorage);
-								const position = {
-									...current,
-									chapterId: speechChapter.id,
-									verse,
-									phase
-								};
-								saveProgress(
-									localStorage,
-									phase === 'summary' ? completeChapter(position) : position
-								);
-								player.storageError = false;
-							} catch {
-								player.storageError = true;
-							}
-							window.dispatchEvent(new Event('reading-progress'));
+							savePosition(speechChapter.id, verse, phase);
 						}
 					})
 				: null;
@@ -69,124 +73,193 @@
 			device?.stop();
 			player.speaking = false;
 		};
-		function readDevice(verse: number, summaryOnly = false, selected: Chapter = chapter) {
+		player.pause = () => {
+			generation++;
+			audio.pause();
+			player.playing = false;
+		};
+		function readDevice(
+			verse: number,
+			summaryOnly = false,
+			chapter: Chapter = genesis,
+			summary?: SpokenSummary
+		) {
 			player.pause();
 			player.stopSpeech();
 			player.started = false;
-			speechChapter = selected;
-			player.chapterId = selected.id;
+			pendingSeek = null;
+			speechChapter = chapter;
+			player.chapterId = chapter.id;
 			player.error = '';
 			if (!device) {
 				player.error =
-					'Device speech is unavailable. You can read the text or use the recorded background audio.';
+					'Device speech is unavailable. Select the recorded chapter or continue reading.';
 				return;
 			}
-			device.read(narrationSegments(selected, verse, summaryOnly));
+			device.read(narrationSegments(chapter, verse, summaryOnly, summary));
 		}
-		player.readDevice = (verse, selected) => readDevice(verse, false, selected);
-		player.readDeviceSummary = () => readDevice(31, true);
-		player.currentTime = resumedTime;
-		Object.assign(player, positionAt(resumedTime, recording.cues));
-		player.pause = () => audio.pause();
+		player.readDevice = (verse, chapter, summary) => readDevice(verse, false, chapter, summary);
+		player.readDeviceSummary = (chapter = genesis, summary) =>
+			readDevice(chapter.verses.length, true, chapter, summary);
+		function sync(force = false) {
+			if (!player.started || pendingSeek !== null) return;
+			player.currentTime = audio.currentTime;
+			Object.assign(player, positionAt(audio.currentTime, track.cues, track.lastVerse));
+			const second = Math.floor(audio.currentTime);
+			if (force || second !== lastSaved) {
+				lastSaved = second;
+				savePosition(trackId, player.verse, player.phase);
+				try {
+					remembered = { chapterId: trackId, hash: track.audioSha256, time: audio.currentTime };
+					localStorage.setItem(key, JSON.stringify(remembered));
+				} catch {
+					player.storageError = true;
+				}
+			}
+			try {
+				if ('mediaSession' in navigator && Number.isFinite(audio.duration) && audio.duration > 0)
+					navigator.mediaSession.setPositionState({
+						duration: audio.duration,
+						position: Math.min(audio.currentTime, audio.duration),
+						playbackRate: audio.playbackRate
+					});
+			} catch {}
+			checkSleep();
+		}
 		player.seek = (time) => {
 			if (!Number.isFinite(time)) return;
-			const target = Math.max(0, Math.min(time, recording.duration));
+			const target = Math.max(0, Math.min(track.duration, time));
 			if (!audio.readyState) {
 				pendingSeek = target;
-				player.currentTime = target;
-				Object.assign(player, positionAt(target, recording.cues));
 				return;
 			}
 			audio.currentTime = target;
-			sync();
+			sync(true);
 		};
-		player.play = async (time) => {
+		async function start(time?: number) {
 			player.error = '';
 			player.stopSpeech();
-			player.chapterId = 'GEN.1';
+			player.chapterId = trackId;
+			player.started = true;
+			player.duration = track.duration;
 			lastSaved = -1;
 			const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
 			try {
 				if (session) session.type = 'playback';
 			} catch {}
-			if (time !== undefined) player.seek(time);
-			else if (!player.started && resumedTime) player.seek(resumedTime);
-			player.started = true;
+			if (time !== undefined) {
+				pendingSeek = time;
+				if (audio.readyState) {
+					audio.currentTime = time;
+					pendingSeek = null;
+				}
+			}
+			audio.playbackRate = player.rate;
 			try {
 				await audio.play();
 			} catch {
-				player.error = 'Playback could not start. Tap Play in the audio controls to try again.';
+				player.playing = false;
+				player.error =
+					'Playback could not start. Reconnect or download this chapter, then tap Play to try again.';
+			}
+		}
+		player.play = async (time) => {
+			generation++;
+			await start(time);
+		};
+		player.playChapter = async (chapter, verse = 1, summaryOnly = false) => {
+			const request = ++generation;
+			player.stopSpeech();
+			audio.pause();
+			player.started = false;
+			player.playing = false;
+			player.error = '';
+			try {
+				const selected = await loadRecording(chapter.id);
+				if (request !== generation) return;
+				const position =
+					remembered?.chapterId === chapter.id && remembered.hash === selected.audioSha256
+						? remembered.time
+						: 0;
+				const resumed = positionAt(position, selected.cues, chapter.verses.length);
+				const target = summaryOnly
+					? selected.summaryStart
+					: position > 0 &&
+						  position < selected.duration &&
+						  resumed.verse === verse &&
+						  resumed.phase === 'reading'
+						? position
+						: (selected.cues.find((cue) => cue.verse !== null && cue.verse >= verse)?.start ?? 0);
+				pendingSeek = target;
+				trackId = chapter.id;
+				track = selected;
+				player.chapterId = chapter.id;
+				player.verse = verse;
+				player.phase = summaryOnly ? 'summary' : 'reading';
+				await tick();
+				if (request !== generation) return;
+				await start(target);
+			} catch (error) {
+				if (request === generation)
+					player.error =
+						error instanceof Error ? error.message : 'This chapter recording could not load.';
 			}
 		};
-		function sync() {
-			// An idle Genesis recording must not overwrite another chapter's device narration.
-			if (!player.started) return;
-			player.currentTime = audio.currentTime;
-			Object.assign(player, positionAt(audio.currentTime, recording.cues));
-			const second = Math.floor(audio.currentTime);
-			if (second === lastSaved) return;
-			lastSaved = second;
-			try {
-				const current = loadProgress(localStorage);
-				const position = {
-					...current,
-					chapterId: 'GEN.1',
-					verse: player.verse,
-					phase: player.phase
-				};
-				saveProgress(
-					localStorage,
-					player.phase === 'summary' ? completeChapter(position) : position
-				);
-				localStorage.setItem(
-					key,
-					JSON.stringify({ revision: recording.audioSha256, time: audio.currentTime })
-				);
-				window.dispatchEvent(new Event('reading-progress'));
-				player.storageError = false;
-			} catch {
-				player.storageError = true;
+		function checkSleep() {
+			if (player.sleepEndsAt !== null && Date.now() >= player.sleepEndsAt) {
+				player.pause();
+				player.stopSpeech();
+				player.sleepEndsAt = null;
 			}
-			try {
-				if ('mediaSession' in navigator && audio.duration && Number.isFinite(audio.duration))
-					navigator.mediaSession.setPositionState({
-						duration: audio.duration,
-						playbackRate: audio.playbackRate,
-						position: Math.min(audio.currentTime, audio.duration)
-					});
-			} catch {}
 		}
+		player.setSleepTimer = (minutes) => {
+			player.sleepEndsAt = minutes > 0 ? Date.now() + minutes * 60_000 : null;
+		};
+		const timer = setInterval(checkSleep, 1000);
+		const metadata = () => {
+			if (pendingSeek !== null) {
+				audio.currentTime = Math.min(pendingSeek, audio.duration || track.duration);
+				pendingSeek = null;
+			}
+			sync(true);
+		};
+		const timeupdate = () => sync();
 		const played = () => {
 			player.started = true;
 			player.playing = true;
-			if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+			player.chapterId = trackId;
+			if ('mediaSession' in navigator) {
+				navigator.mediaSession.playbackState = 'playing';
+				if ('MediaMetadata' in window)
+					navigator.mediaSession.metadata = new MediaMetadata({
+						title: `${nativeChapter?.book} ${nativeChapter?.chapter} and chapter overview`,
+						artist: 'Help with the Bible',
+						album: `World English Bible · ${track.voiceLabel ?? 'Recorded narration'}`,
+						artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }]
+					});
+			}
 		};
 		const paused = () => {
-			player.playing = false;
+			player.playing = !audio.paused;
 			sync();
-			if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+			if ('mediaSession' in navigator)
+				navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+		};
+		const ended = () => {
+			sync(true);
+			paused();
 		};
 		const failed = () => {
 			player.playing = false;
-			player.error =
-				'The narration could not load. Reconnect to download it, or continue reading the text.';
+			if (player.started)
+				player.error = 'The recording could not load. Reconnect or choose a downloaded chapter.';
 		};
-		const metadata = () => {
-			if (pendingSeek !== null) {
-				audio.currentTime = pendingSeek;
-				pendingSeek = null;
-				sync();
-			}
+		const visibility = () => {
+			sync();
+			checkSleep();
 		};
 		const actions: MediaSessionAction[] = [];
-		if ('mediaSession' in navigator) {
-			if ('MediaMetadata' in window)
-				navigator.mediaSession.metadata = new MediaMetadata({
-					title: 'Genesis 1 and chapter summary',
-					artist: 'Help with the Bible',
-					album: 'World English Bible · Kokoro Heart',
-					artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }]
-				});
+		if ('mediaSession' in navigator)
 			for (const [action, handler] of Object.entries({
 				play: () => void player.play(),
 				pause: player.pause,
@@ -203,30 +276,28 @@
 					actions.push(action as MediaSessionAction);
 				} catch {}
 			}
-		}
-		audio.setAttribute('playsinline', '');
-		audio.addEventListener('timeupdate', sync);
-		audio.addEventListener('seeked', sync);
-		audio.addEventListener('play', played);
-		audio.addEventListener('pause', paused);
-		audio.addEventListener('ended', paused);
-		audio.addEventListener('error', failed);
-		audio.addEventListener('loadedmetadata', metadata);
-		document.addEventListener('visibilitychange', sync);
-		window.addEventListener('pagehide', sync);
+		const events: { [key: string]: () => void } = {
+			timeupdate,
+			seeked: timeupdate,
+			play: played,
+			pause: paused,
+			ended,
+			error: failed,
+			loadedmetadata: metadata
+		};
+		for (const [event, handler] of Object.entries(events)) audio.addEventListener(event, handler);
+		document.addEventListener('visibilitychange', visibility);
+		window.addEventListener('pagehide', timeupdate);
 		return () => {
+			generation++;
 			audio.pause();
 			player.stopSpeech();
+			clearInterval(timer);
 			for (const action of actions) navigator.mediaSession.setActionHandler(action, null);
-			audio.removeEventListener('timeupdate', sync);
-			audio.removeEventListener('seeked', sync);
-			audio.removeEventListener('play', played);
-			audio.removeEventListener('pause', paused);
-			audio.removeEventListener('ended', paused);
-			audio.removeEventListener('error', failed);
-			audio.removeEventListener('loadedmetadata', metadata);
-			document.removeEventListener('visibilitychange', sync);
-			window.removeEventListener('pagehide', sync);
+			for (const [event, handler] of Object.entries(events))
+				audio.removeEventListener(event, handler);
+			document.removeEventListener('visibilitychange', visibility);
+			window.removeEventListener('pagehide', timeupdate);
 		};
 	});
 </script>
@@ -235,29 +306,39 @@
 	{#if player.speaking}<span>
 			Device voice · {spokenChapter?.book}
 			{spokenChapter?.chapter}
-			{player.phase === 'summary' ? 'complete' : `verse ${player.verse}`}
+			{player.phase === 'summary' ? 'overview' : `verse ${player.verse}`}
 		</span><Button variants={['ghost']} class="button-secondary" onclick={player.stopSpeech}>
 			Stop device voice
 		</Button>{/if}
 	{#if player.started}<div class="audio-dock-label">
 			<A href="/read">
-				Genesis 1 · {player.phase === 'summary' ? 'Chapter summary' : `Verse ${player.verse}`}
-			</A><span>Kokoro Heart · AI-generated voice</span>
+				{nativeChapter?.book}
+				{nativeChapter?.chapter} · {player.phase === 'summary'
+					? 'Chapter overview'
+					: `Verse ${player.verse}`}
+			</A><span>{track.voiceLabel ?? 'Recorded narration'}</span>
 		</div>{/if}
 	<audio
 		bind:this={audio}
-		src={recording.src}
+		src={track.src}
 		controls
-		preload="metadata"
-		aria-label="Genesis 1 and chapter summary narration"
+		preload="none"
+		aria-label={`${nativeChapter?.book} ${nativeChapter?.chapter} and chapter overview narration`}
 		hidden={!player.started}
 	></audio>
+	{#if player.sleepEndsAt}<span class="reader-smallprint">
+			Sleep timer ends at {new Date(player.sleepEndsAt).toLocaleTimeString([], {
+				hour: 'numeric',
+				minute: '2-digit'
+			})}
+		</span>{/if}
 	{#if player.started}<Button
 			variants={['ghost']}
 			class="audio-close"
 			onclick={() => {
 				player.pause();
 				player.started = false;
+				player.setSleepTimer(0);
 			}}
 		>
 			Close player

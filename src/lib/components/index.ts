@@ -10,6 +10,8 @@ export { default as PwaManager } from './PwaManager.svelte';
 export { default as InstallApp } from './InstallApp.svelte';
 export { default as AudioPlayer } from './AudioPlayer.svelte';
 export { default as InteractionSettings } from './InteractionSettings.svelte';
+export { default as StudyPanel } from './StudyPanel.svelte';
+export { default as AudioDownload } from './AudioDownload.svelte';
 export {
 	BookOpen,
 	Bookmark,

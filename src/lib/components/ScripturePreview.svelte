@@ -24,7 +24,7 @@
 					player.pause();
 					player.stopSpeech();
 				} else if (player.narrator === 'device') player.readDevice(1);
-				else void player.play(0);
+				else void player.playChapter(chapter, 1);
 			}}
 		>
 			<Play size={15} />{player.playing || player.speaking

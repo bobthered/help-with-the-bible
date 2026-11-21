@@ -996,8 +996,202 @@ html[data-color='gold'] {
 }
 .verse-sheet p {
 	font-family: var(--serif);
-	font-size: clamp(1.5rem, 3vw, 2rem);
-	line-height: 1.65;
+	font-size: inherit;
+	line-height: inherit;
+}
+.reading-preferences {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	align-items: end;
+	margin-bottom: 28px;
+	padding-bottom: 24px;
+	border-bottom: 1px solid var(--border);
+}
+.reading-preferences label,
+.study-panel label {
+	display: grid;
+	gap: 8px;
+	font-size: 0.875rem;
+}
+.reading-preferences [role='group'],
+.verse-jump,
+.verse-tools,
+.audio-download-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+.verse-jump {
+	align-items: end;
+}
+.verse-jump input {
+	width: 90px;
+}
+.reading-preferences input:not([type='range']),
+.reading-preferences select,
+.study-panel input,
+.study-panel select,
+.study-panel textarea {
+	min-height: 44px;
+	padding: 10px 12px;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	background: var(--surface);
+	color: var(--foreground);
+	max-width: 100%;
+}
+.reading-preferences [aria-pressed='true'] {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+.chapter-sheet {
+	font-family: var(--serif);
+	padding: 24px;
+	background: var(--surface-raised);
+	border: 1px solid var(--border);
+}
+.chapter-sheet article {
+	display: grid;
+	grid-template-columns: 36px minmax(0, 1fr);
+	column-gap: 12px;
+	padding: 12px 8px;
+	border-left: 3px solid transparent;
+	scroll-margin-top: 24px;
+}
+.chapter-sheet p {
+	font-size: inherit;
+	line-height: inherit;
+}
+.chapter-sheet .current-verse {
+	border-left-color: var(--accent);
+}
+.verse-anchor {
+	align-self: start;
+	color: var(--accent);
+	font: inherit;
+	font-size: 14px;
+	min-height: 44px;
+}
+[data-highlight='gold'] {
+	background: color-mix(in srgb, var(--accent) 16%, var(--surface-raised));
+}
+[data-highlight='blue'] {
+	background: color-mix(in srgb, #5799d4 18%, var(--surface-raised));
+}
+.study-panel,
+.audio-download-panel {
+	margin-top: 36px;
+	padding-top: 24px;
+	border-top: 1px solid var(--border);
+}
+.study-panel h3,
+.audio-download-panel h3,
+.chapter-summary h3 {
+	font-family: var(--serif);
+	font-size: 1.4rem;
+	margin-block: 20px 12px;
+}
+.study-disclosure {
+	border-bottom: 1px solid var(--border);
+	padding-block: 18px;
+}
+.study-disclosure > summary {
+	cursor: pointer;
+	min-height: 36px;
+	color: var(--foreground);
+}
+.study-disclosure[open] > summary {
+	margin-bottom: 18px;
+}
+.study-disclosure > label,
+.study-disclosure > p,
+.study-disclosure > .button-secondary {
+	margin-block: 14px;
+}
+.study-panel textarea {
+	width: 100%;
+	resize: vertical;
+}
+.scripture-search {
+	display: flex;
+	gap: 14px;
+	flex-wrap: wrap;
+	align-items: end;
+}
+.scripture-search label {
+	flex: 1 1 180px;
+	min-width: 0;
+}
+.scripture-search input {
+	width: 100%;
+}
+.search-results {
+	display: grid;
+	gap: 12px;
+	margin-top: 16px;
+	max-height: 500px;
+	overflow: auto;
+}
+.search-result {
+	display: grid;
+	gap: 8px;
+	padding: 16px;
+	text-align: left;
+	white-space: normal;
+	border: 1px solid var(--border);
+	border-radius: 4px;
+}
+.search-result strong {
+	color: var(--accent);
+	font-weight: 500;
+}
+.search-result span {
+	font-family: var(--serif);
+	font-size: 1.0625rem;
+	line-height: 1.8;
+}
+.saved-passage {
+	padding-block: 14px;
+	border-bottom: 1px solid var(--border);
+}
+.saved-passage p {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	margin-top: 8px;
+	line-height: 1.8;
+	color: var(--muted);
+}
+.backup-preview {
+	padding: 18px;
+	border: 1px solid var(--border);
+	margin-top: 16px;
+}
+.backup-preview p {
+	line-height: 1.8;
+	margin-bottom: 14px;
+}
+.chapter-summary ul {
+	padding-left: 20px;
+	line-height: 1.8;
+}
+.chapter-summary li {
+	margin-block: 12px;
+}
+@media (max-width: 600px) {
+	.chapter-sheet {
+		padding: 12px 4px;
+	}
+	.reading-preferences {
+		gap: 14px;
+	}
+	.interaction-settings > label {
+		display: block;
+	}
+	.study-panel input[type='file'] {
+		width: 100%;
+	}
 }
 .reader-toolbar {
 	display: flex;
