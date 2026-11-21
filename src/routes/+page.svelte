@@ -1,39 +1,143 @@
 <script lang="ts">
-	import { H1, H2, P, ThemeToggle } from '$lib/components';
-
-	const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+	import {
+		A,
+		SiteHeader,
+		SiteFooter,
+		ScripturePreview,
+		ReadingJourney,
+		BookOpen,
+		Headphones,
+		MessageCircle,
+		Check,
+		Details,
+		Summary
+	} from '$lib/components';
 </script>
 
 <svelte:head>
-	<title>Help with the Bible</title>
-	<meta name="description" content="A place to grow in your understanding of the Bible." />
+	<title>Help with the Bible — One chapter at a time</title>
+	<meta
+		name="description"
+		content="Find your way through the Bible, one verse at a time. Read or listen to Genesis, reflect on the chapter, and come back to your saved place."
+	/>
 </svelte:head>
 
-<main class="mx-auto max-w-5xl px-6 py-8 sm:px-10">
-	<header class="flex flex-wrap items-center justify-between gap-4 border-b border-(--border) pb-6">
-		<span class="font-semibold">Help with the Bible</span>
-		<ThemeToggle />
-	</header>
-
-	<section class="max-w-2xl py-20 sm:py-28">
-		<P class="mb-4 text-(--accent)">A foundation for understanding.</P>
-		<H1 class="font-serif text-5xl leading-tight sm:text-6xl">Help with the Bible</H1>
-		<P class="mt-6 max-w-lg text-lg text-(--muted)">
-			A place to explore Scripture, ask questions, and grow in understanding. We're just getting
-			started.
-		</P>
+<SiteHeader />
+<main id="main">
+	<section class="hero shell" aria-labelledby="hero-heading">
+		<div class="hero-copy">
+			<p class="eyebrow"><span></span>A quieter way to understand Scripture</p>
+			<h1 id="hero-heading">One chapter.<br />A little more<br /><em>understanding.</em></h1>
+			<p class="hero-description">
+				You don’t have to understand the whole Bible today. Begin at the beginning. Read a verse,
+				take your time, and make room for your questions.
+			</p>
+			<div class="hero-actions">
+				<A href="/read" class="button-primary"><BookOpen size={18} />Begin with Genesis</A><A
+					href="#experience"
+					class="text-link"
+				>
+					How it works
+				</A>
+			</div>
+			<p class="hero-note">
+				<Check size={14} />No account needed<span>·</span>Your place, remembered
+			</p>
+		</div>
+		<div class="hero-reading">
+			<ScripturePreview />
+			<div class="preview-caption">
+				<span class="caption-rule"></span>The first words. Your own pace.
+			</div>
+		</div>
 	</section>
 
-	<section aria-labelledby="palette-heading" class="border-t border-(--border) py-8">
-		<H2 id="palette-heading" class="font-serif">The site palette</H2>
-		<P class="mt-3 text-(--muted)">Black and white foundations, with gold for emphasis.</P>
-		<div class="mt-6 grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-11">
-			{#each shades as shade}
-				<div>
-					<div class="h-16 rounded-sm" style:background={`var(--color-primary-${shade})`}></div>
-					<P class="mt-2 text-sm text-(--muted)">{shade}</P>
-				</div>
-			{/each}
+	<section class="experience-section" id="experience" aria-labelledby="experience-heading">
+		<div class="shell experience-layout">
+			<div class="experience-intro">
+				<p class="section-label">A simple rhythm</p>
+				<h2 id="experience-heading">Read slowly.<br />Leave with more.</h2>
+				<p>A path through Scripture with space to pause, reflect, and ask why.</p>
+			</div>
+			<div class="experience-steps">
+				<article>
+					<div class="step-icon"><BookOpen size={22} /></div>
+					<div>
+						<h3>Let the words come first.</h3>
+						<p>
+							Move through each chapter, verse by verse. The Bible text stays exactly as written in
+							the selected translation.
+						</p>
+						<span class="feature-note">Try the complete first chapter</span>
+					</div>
+				</article>
+				<article>
+					<div class="step-icon"><Headphones size={22} /></div>
+					<div>
+						<h3>Read it. Or hear it.</h3>
+						<p>
+							Follow on screen or let your browser read aloud. Your place is saved as you go, so you
+							can return when you’re ready.
+						</p>
+						<span class="feature-note">Reading and audio available now</span>
+					</div>
+				</article>
+				<article>
+					<div class="step-icon"><MessageCircle size={22} /></div>
+					<div>
+						<h3>Make room for understanding.</h3>
+						<p>
+							Finish Genesis 1 with a short chapter overview. Next, we’re adding Scripture-grounded
+							answers to your written and spoken questions.
+						</p>
+						<span class="feature-note">Chapter overview now · AI questions planned</span>
+					</div>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<ReadingJourney />
+
+	<section class="questions-section shell" aria-labelledby="questions-heading">
+		<div>
+			<p class="section-label">Before you begin</p>
+			<h2 id="questions-heading">A few things<br />worth knowing.</h2>
+		</div>
+		<div class="faq-list">
+			<Details>
+				<Summary>Which Bible will I be reading?</Summary>
+				<p>
+					The first chapter uses the World English Bible, a public-domain English translation. The
+					translation is always named beside the text. More translation options can be added as the
+					reader grows.
+				</p>
+			</Details>
+			<Details>
+				<Summary>How is my progress saved?</Summary>
+				<p>
+					Your current verse and completed chapters are kept in this browser using local storage.
+					There’s no account and no automatic sync between devices. Clearing your browser’s site
+					data clears your place.
+				</p>
+			</Details>
+			<Details>
+				<Summary>Can I listen and ask questions out loud?</Summary>
+				<p>
+					Browser narration is available now where supported. Spoken questions and spoken AI answers
+					are planned. You’ll still be able to type, and the microphone will only be used when you
+					choose to speak.
+				</p>
+			</Details>
+			<Details>
+				<Summary>Is the entire Bible available yet?</Summary>
+				<p>
+					This first release includes Genesis 1 and its chapter overview. The full journey will
+					follow the Bible in order, from Genesis to Revelation. AI questions and the remaining
+					chapters are the next stage.
+				</p>
+			</Details>
 		</div>
 	</section>
 </main>
+<SiteFooter />

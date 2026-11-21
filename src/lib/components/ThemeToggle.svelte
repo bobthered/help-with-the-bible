@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button } from '$lib/components';
+	import { Button, Sun, Moon } from '$lib/components';
 
 	let isDark = $state(false);
 
@@ -20,6 +20,13 @@
 	}
 </script>
 
-<Button onclick={toggleTheme} aria-label="Dark mode" aria-pressed={isDark}>
-	{isDark ? 'Light mode' : 'Dark mode'}
+<Button
+	variants={['ghost']}
+	class="theme-toggle"
+	onclick={toggleTheme}
+	aria-label="Dark mode"
+	aria-pressed={isDark}
+	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+>
+	{#if isDark}<Sun size={19} />{:else}<Moon size={19} />{/if}
 </Button>

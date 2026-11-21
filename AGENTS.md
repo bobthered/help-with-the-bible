@@ -15,6 +15,15 @@
 - Keep SvelteKit configuration in `vite.config.ts`, using `@sveltejs/adapter-vercel`.
 - Use black/white light and dark surfaces with gold as the primary color. Maintain the palette in `src/app.css`.
 
+## Reading and analysis
+
+- The product is a sequential Bible reader with chapter summaries and questions, beginning at Genesis. Track verse position and completed chapters with versioned local storage.
+- Scripture must come from a verified, named translation dataset. Preserve verse wording and punctuation; never generate or paraphrase Bible text with an LLM.
+- Keep commentary, summaries, and AI interpretation visibly separate from Scripture. Cite passages and acknowledge differing interpretations when relevant.
+- Use the public-domain World English Bible provisionally until the user chooses a translation.
+- Spoken reading must narrate the stored Scripture text. Require an explicit user action to start audio or microphone capture, and preserve typed/read-only fallbacks.
+- Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
+
 ## Components
 
 - Keep all project components in `src/lib/components` (the `/lib/components` component directory).

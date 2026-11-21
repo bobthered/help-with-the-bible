@@ -1,9 +1,10 @@
 # Changes
 
-- Initialize SvelteKit 3 with TypeScript, Tailwind CSS 4, Prettier, and the Vercel adapter.
-- Install Sveltewind and its required Lucide icons; configure its stylesheet, source scanning, dark variant, and minimal theme preset.
-- Re-export all Sveltewind components through `src/lib/components` and configure `$lib` imports for Vite and TypeScript.
-- Add a gold primary palette with black/white light and dark surfaces, matching contrast colors, and neutral secondary shades.
-- Add a starter page with palette swatches and a theme toggle that remembers the selected mode and defaults to the system preference.
-- Replace the scaffold favicon with a gold book icon.
-- Document development commands, theme configuration, and Vercel deployment; update project instructions for the initialized stack.
+- Build an editorial landing page with the gold, black, and white palette, Scripture preview, reading journey, feature explanations, and FAQs.
+- Add a working Genesis 1 reader with verse-by-verse navigation, persistent browser progress, and a chapter overview labeled as commentary.
+- Import all 31 Genesis 1 verses from the public-domain World English Bible, recording source provenance and providing a reproducible import script.
+- Add optional browser narration of stored verse text, synchronized reading position, stop controls, and unsupported-browser and storage-error fallbacks.
+- Add shared header, footer, book mark, and accessible theme control through the component barrel.
+- Add tests for progress validation, storage failures, resume behavior, and Scripture dataset integrity.
+- Document the recommended Vercel/OpenAI architecture, full-Bible import, grounded questions, and staged voice support; distinguish planned features from available behavior.
+- Update project instructions for exact Scripture, local progress, and separate analysis.
