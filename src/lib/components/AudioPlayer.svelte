@@ -4,6 +4,9 @@
 	import { AUDIO_CONTEXT, type AudioState, positionAt } from '$lib/audio/context';
 	import recording from '$lib/bible/genesis-1-audio.json';
 	import { loadProgress, saveProgress } from '$lib/reading/progress';
+	import { createDeviceNarrator } from '$lib/audio/device';
+	import chapter from '$lib/bible/genesis-1.json';
+	import summary from '$lib/bible/genesis-1-summary.json';
 	const player = getContext<AudioState>(AUDIO_CONTEXT);
 	const key = 'help-with-the-bible:audio:v1';
 	let audio: HTMLAudioElement;
@@ -22,15 +25,71 @@
 			)
 				resumedTime = saved.time;
 		} catch {}
-		let speech: SpeechSynthesisUtterance | null = null;
-		let speechGeneration = 0;
 		let pendingSeek: number | null = null;
+		const device =
+			'speechSynthesis' in window
+				? createDeviceNarrator({
+						engine: speechSynthesis,
+						createUtterance: (text) => new SpeechSynthesisUtterance(text),
+						voice: () => player.deviceVoice,
+						onstate: (speaking) => {
+							player.speaking = speaking;
+						},
+						onerror: () => {
+							player.error =
+								'Device speech stopped. Try again or use the recorded background audio.';
+						},
+						onposition: (verse, phase) => {
+							player.verse = verse;
+							player.phase = phase;
+							try {
+								const current = loadProgress(localStorage);
+								saveProgress(localStorage, {
+									...current,
+									verse,
+									phase,
+									completedChapterIds: phase === 'summary' ? ['GEN.1'] : current.completedChapterIds
+								});
+								player.storageError = false;
+							} catch {
+								player.storageError = true;
+							}
+							window.dispatchEvent(new Event('reading-progress'));
+						}
+					})
+				: null;
 		player.stopSpeech = () => {
-			speechGeneration++;
-			if ('speechSynthesis' in window) speechSynthesis.cancel();
-			speech = null;
+			device?.stop();
 			player.speaking = false;
 		};
+		const summarySegments = [
+			{
+				text: `Chapter complete. The following is a chapter summary, separate from Scripture. ${summary.title}`,
+				verse: 31,
+				phase: 'summary' as const
+			},
+			...summary.paragraphs.map((text) => ({ text, verse: 31, phase: 'summary' as const }))
+		];
+		function readDevice(verse: number, summaryOnly = false) {
+			player.pause();
+			player.started = false;
+			player.error = '';
+			if (!device) {
+				player.error =
+					'Device speech is unavailable. You can read the text or use the recorded background audio.';
+				return;
+			}
+			device.read([
+				...(summaryOnly
+					? []
+					: chapter.verses
+							.filter((item) => item.number >= verse)
+							.map((item) => ({ text: item.text, verse: item.number, phase: 'reading' as const }))),
+				...summarySegments
+			]);
+		}
+		player.readDevice = (verse) => readDevice(verse);
+		player.readDeviceSummary = () => readDevice(31, true);
 		player.currentTime = resumedTime;
 		Object.assign(player, positionAt(resumedTime, recording.cues));
 		player.pause = () => audio.pause();
@@ -61,40 +120,6 @@
 			} catch {
 				player.error = 'Playback could not start. Tap Play in the audio controls to try again.';
 			}
-		};
-		player.speak = (text) => {
-			player.error = '';
-			player.pause();
-			player.stopSpeech();
-			if (!('speechSynthesis' in window)) {
-				player.error =
-					'Spoken answers are unavailable in this browser. The answer is still shown on screen.';
-				return;
-			}
-			speech = new SpeechSynthesisUtterance(text);
-			const generation = speechGeneration;
-			speech.lang = 'en-US';
-			speech.rate = 0.95;
-			const voices = speechSynthesis.getVoices();
-			speech.voice =
-				voices.find((voice) => voice.voiceURI === player.deviceVoice) ??
-				voices.find(
-					(voice) => voice.lang.startsWith('en') && /natural|premium|enhanced/i.test(voice.name)
-				) ??
-				voices.find((voice) => voice.lang.startsWith('en')) ??
-				null;
-			speech.onend = () => {
-				if (generation !== speechGeneration) return;
-				player.speaking = false;
-				speech = null;
-			};
-			speech.onerror = () => {
-				if (generation !== speechGeneration) return;
-				player.speaking = false;
-				speech = null;
-			};
-			player.speaking = true;
-			speechSynthesis.speak(speech);
 		};
 		function sync() {
 			player.currentTime = audio.currentTime;
@@ -203,7 +228,12 @@
 	});
 </script>
 
-<div class="audio-dock" class:audio-dock-active={player.started}>
+<div class="audio-dock" class:audio-dock-active={player.started || player.speaking}>
+	{#if player.speaking}<span>
+			Device voice · Genesis 1 {player.phase === 'summary' ? 'summary' : `verse ${player.verse}`}
+		</span><Button variants={['ghost']} class="button-secondary" onclick={player.stopSpeech}>
+			Stop device voice
+		</Button>{/if}
 	{#if player.started}<div class="audio-dock-label">
 			<A href="/read">
 				Genesis 1 · {player.phase === 'summary' ? 'Chapter summary' : `Verse ${player.verse}`}

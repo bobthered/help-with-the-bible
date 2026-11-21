@@ -7,6 +7,7 @@ export type AudioState = {
 	verse: number;
 	phase: 'reading' | 'summary';
 	mode: 'text' | 'voice';
+	narrator: 'device' | 'recorded';
 	rate: number;
 	deviceVoice: string;
 	error: string;
@@ -15,7 +16,8 @@ export type AudioState = {
 	play: (time?: number) => Promise<void>;
 	pause: () => void;
 	seek: (time: number) => void;
-	speak: (text: string) => void;
+	readDevice: (verse: number) => void;
+	readDeviceSummary: () => void;
 	stopSpeech: () => void;
 };
 export function initialAudioState(): AudioState {
@@ -27,6 +29,7 @@ export function initialAudioState(): AudioState {
 		verse: 1,
 		phase: 'reading',
 		mode: 'text',
+		narrator: 'device',
 		rate: 1,
 		deviceVoice: '',
 		error: '',
@@ -35,7 +38,8 @@ export function initialAudioState(): AudioState {
 		play: async () => {},
 		pause: () => {},
 		seek: () => {},
-		speak: () => {},
+		readDevice: () => {},
+		readDeviceSummary: () => {},
 		stopSpeech: () => {}
 	};
 }

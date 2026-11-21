@@ -17,15 +17,16 @@
 
 ## Reading and analysis
 
-- The product is a sequential Bible reader with chapter summaries and questions, beginning at Genesis. Track verse position and completed chapters with versioned local storage.
+- The product is a sequential Bible reader with chapter summaries, beginning at Genesis. Track verse position and completed chapters with versioned local storage. Do not add follow-up questions or chat.
 - Scripture must come from a verified, named translation dataset. Preserve verse wording and punctuation; never generate or paraphrase Bible text with an LLM.
 - Keep commentary, summaries, and AI interpretation visibly separate from Scripture. Cite passages and acknowledge differing interpretations when relevant.
 - Use the public-domain World English Bible provisionally until the user chooses a translation.
 - Spoken reading must narrate the stored Scripture text. Require an explicit user action to start audio or microphone capture, and preserve typed/read-only fallbacks.
 - Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
 - Use the persistent root native audio player for recorded Scripture and summaries. Keep each chapter and its spoken summary in one track so background playback does not depend on JavaScript starting the next segment.
-- Keep generated narration and timing metadata synchronized with verified Scripture and separate editorial summaries. Model downloads belong in ignored `.cache/`, not the browser bundle.
-- Maintain typed input and text output alongside explicit microphone and spoken-answer controls. Show missing AI configuration honestly; keep provider credentials server-only and enforce durable request limits.
+- Everything must deploy as one Vercel site, with no external LLM/model server, AI API, Redis service, or required environment credentials.
+- Use the standard device voice by default. The existing bundled MP3 is an optional background-listening alternative, served by Vercel. Keep narration and timing metadata synchronized with Scripture and the separate chapter summary.
+- Do not install Kokoro, Transformers, ONNX, CUDA, or other model-generation dependencies as part of this project. Deploy the committed audio directly.
 
 ## Progressive web app
 

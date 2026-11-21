@@ -9,8 +9,6 @@ export { default as ChapterReader } from './ChapterReader.svelte';
 export { default as PwaManager } from './PwaManager.svelte';
 export { default as InstallApp } from './InstallApp.svelte';
 export { default as AudioPlayer } from './AudioPlayer.svelte';
-export { default as SpeechInput } from './SpeechInput.svelte';
-export { default as ChapterQuestions } from './ChapterQuestions.svelte';
 export { default as InteractionSettings } from './InteractionSettings.svelte';
 export {
 	BookOpen,

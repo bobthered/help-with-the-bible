@@ -7,7 +7,7 @@
 		ReadingJourney,
 		BookOpen,
 		Headphones,
-		MessageCircle,
+		Bookmark,
 		Check,
 		Details,
 		Summary
@@ -30,7 +30,7 @@
 			<h1 id="hero-heading">One chapter.<br />A little more<br /><em>understanding.</em></h1>
 			<p class="hero-description">
 				You don’t have to understand the whole Bible today. Begin at the beginning. Read a verse,
-				take your time, and make room for your questions.
+				take your time, and reflect on each chapter.
 			</p>
 			<div class="hero-actions">
 				<A href="/read" class="button-primary"><BookOpen size={18} />Begin with Genesis</A><A
@@ -76,24 +76,21 @@
 					<div>
 						<h3>Read it. Or hear it.</h3>
 						<p>
-							Follow on screen or listen to the natural Kokoro narration. Your place is saved as you
-							go, so you can return when you’re ready.
+							Follow on screen or listen with your device’s standard voice. Your place is saved as
+							you go, so you can return when you’re ready.
 						</p>
 						<span class="feature-note">Reading and audio available now</span>
 					</div>
 				</article>
 				<article>
-					<div class="step-icon"><MessageCircle size={22} /></div>
+					<div class="step-icon"><Bookmark size={22} /></div>
 					<div>
 						<h3>Make room for understanding.</h3>
 						<p>
-							Finish Genesis 1 with a written or spoken overview, explore study notes, and ask a
-							question by typing or dictating. Live AI answers require the question service to be
-							connected.
+							Finish Genesis 1 with a short overview, clearly separated from Scripture. Read it at
+							your own pace or have the summary spoken to you.
 						</p>
-						<span class="feature-note">
-							Spoken overview · Chapter study notes · Question interface
-						</span>
+						<span class="feature-note"> Written and spoken chapter overview </span>
 					</div>
 				</article>
 			</div>
@@ -125,12 +122,11 @@
 				</p>
 			</Details>
 			<Details>
-				<Summary>Can I listen and ask questions out loud?</Summary>
+				<Summary>Can I listen with the screen locked?</Summary>
 				<p>
-					Yes. Listen to a continuous chapter and summary recording, or choose Read & type. Where
-					dictation is supported, choose Listen & speak to ask a question aloud. AI questions need
-					the server service to be connected; editorial study notes are available now. The
-					microphone is only used when you choose to speak.
+					Standard device speech works best with the app open. For background listening, select the
+					bundled chapter-and-summary recording. It is hosted with this site and needs no AI
+					account. Playback behavior can vary with your device and interruptions.
 				</p>
 			</Details>
 			<Details>

@@ -19,9 +19,19 @@
 		<Button
 			variants={['ghost']}
 			class="audio-button"
-			onclick={() => (player.playing ? player.pause() : void player.play(0))}
+			onclick={() => {
+				if (player.playing || player.speaking) {
+					player.pause();
+					player.stopSpeech();
+				} else if (player.narrator === 'device') player.readDevice(1);
+				else void player.play(0);
+			}}
 		>
-			<Play size={15} />{player.playing ? 'Pause narration' : 'Listen to Genesis 1'}
-		</Button><span>World English Bible · Kokoro Heart</span>
+			<Play size={15} />{player.playing || player.speaking
+				? 'Stop narration'
+				: 'Listen to Genesis 1'}
+		</Button><span>
+			World English Bible · {player.narrator === 'device' ? 'Device voice' : 'Bundled recording'}
+		</span>
 	</div>
 </aside>

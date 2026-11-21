@@ -4,12 +4,8 @@ import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { positionAt } from '../src/lib/audio/context.ts';
 import { audioRangeResponse } from '../src/lib/pwa/range.ts';
-import {
-	askChapterQuestion,
-	consumeStudyLimit,
-	parseStudyAnswer
-} from '../src/lib/server/study.ts';
 import { revealOnScroll } from '../src/lib/attachments/reveal.ts';
+import { createDeviceNarrator } from '../src/lib/audio/device.ts';
 
 const recording = JSON.parse(
 	readFileSync(new URL('../src/lib/bible/genesis-1-audio.json', import.meta.url), 'utf8')
@@ -17,6 +13,71 @@ const recording = JSON.parse(
 const chapter = JSON.parse(
 	readFileSync(new URL('../src/lib/bible/genesis-1.json', import.meta.url), 'utf8')
 );
+
+test('standard device speech reads stored verses and then a labeled summary without a model service', () => {
+	const spoken: SpeechSynthesisUtterance[] = [],
+		positions: unknown[] = [];
+	let speaking = false;
+	const narrator = createDeviceNarrator({
+		engine: {
+			speak: (utterance) => {
+				spoken.push(utterance);
+			},
+			cancel() {},
+			getVoices: () => []
+		},
+		createUtterance: (text) => ({ text }) as SpeechSynthesisUtterance,
+		voice: () => '',
+		onposition: (verse, phase) => positions.push({ verse, phase }),
+		onstate: (value) => {
+			speaking = value;
+		},
+		onerror: () => assert.fail('Unexpected speech error')
+	});
+	narrator.read([
+		...chapter.verses.map((verse: { number: number; text: string }) => ({
+			text: verse.text,
+			verse: verse.number,
+			phase: 'reading' as const
+		})),
+		{ text: 'Chapter summary, separate from Scripture.', verse: 31, phase: 'summary' }
+	]);
+	for (let index = 0; index < 32; index++) {
+		const utterance = spoken[index];
+		assert.ok(utterance);
+		utterance.onstart?.({} as SpeechSynthesisEvent);
+		if (index < 31) assert.equal(utterance.text, chapter.verses[index].text);
+		utterance.onend?.({} as SpeechSynthesisEvent);
+	}
+	assert.deepEqual(positions.at(-1), { verse: 31, phase: 'summary' });
+	assert.equal(speaking, false);
+});
+
+test('stopping device narration prevents stale speech events from advancing to another verse', () => {
+	const spoken: SpeechSynthesisUtterance[] = [];
+	const narrator = createDeviceNarrator({
+		engine: {
+			speak: (utterance) => {
+				spoken.push(utterance);
+			},
+			cancel() {},
+			getVoices: () => []
+		},
+		createUtterance: (text) => ({ text }) as SpeechSynthesisUtterance,
+		voice: () => '',
+		onposition() {},
+		onstate() {},
+		onerror: () => assert.fail('Unexpected stale error')
+	});
+	narrator.read([
+		{ text: chapter.verses[0].text, verse: 1, phase: 'reading' },
+		{ text: chapter.verses[1].text, verse: 2, phase: 'reading' }
+	]);
+	narrator.stop();
+	spoken[0].onend?.({} as SpeechSynthesisEvent);
+	spoken[0].onerror?.({} as SpeechSynthesisErrorEvent);
+	assert.equal(spoken.length, 1);
+});
 
 test('one complete narration contains all verses and the summary with an intact asset checksum', () => {
 	const audio = readFileSync(new URL(`../static${recording.src}`, import.meta.url));
@@ -78,87 +139,6 @@ test('invalid or unsatisfiable audio ranges return 416 rather than incorrect aud
 		assert.equal(response.status, 416);
 		assert.equal(response.headers.get('Content-Range'), 'bytes */10');
 	}
-});
-
-test('AI requests use trusted chapter text, private credentials, structured output, and no stored conversation', async () => {
-	const mockFetch = async (url: string | URL | Request, init?: RequestInit) => {
-		assert.equal(url, 'https://api.openai.com/v1/responses');
-		assert.equal((init!.headers as Record<string, string>).Authorization, 'Bearer test-only-key');
-		const body = JSON.parse(init!.body as string);
-		assert.equal(body.store, false);
-		assert.equal(body.model, 'test-model');
-		assert.ok(body.input.includes(chapter.verses[0].text));
-		assert.ok(body.input.includes('Why is creation good?'));
-		assert.equal(body.text.format.type, 'json_schema');
-		assert.equal(body.text.format.strict, true);
-		return Response.json({
-			status: 'completed',
-			output: [
-				{
-					content: [
-						{
-							type: 'output_text',
-							text: JSON.stringify({
-								answer: 'The chapter repeatedly calls creation good.',
-								references: [4, 31, 31],
-								uncertainty: 'It does not explain every later question about evil.'
-							})
-						}
-					]
-				}
-			]
-		});
-	};
-	const answer = await askChapterQuestion(
-		'Why is creation good?',
-		chapter.verses,
-		{ apiKey: 'test-only-key', model: 'test-model' },
-		mockFetch as typeof fetch
-	);
-	assert.deepEqual(answer.references, [4, 31]);
-});
-
-test('invalid citations and unfinished provider responses are not displayed as valid answers', async () => {
-	for (const references of [[32], [0], [1.5], ['1']])
-		assert.throws(
-			() => parseStudyAnswer({ answer: 'Example', references, uncertainty: '' }),
-			/Invalid/
-		);
-	await assert.rejects(
-		askChapterQuestion('Why?', chapter.verses, { apiKey: 'test', model: 'test' }, (async () =>
-			Response.json({ status: 'incomplete' })) as typeof fetch),
-		/could not finish/
-	);
-	await assert.rejects(
-		askChapterQuestion(
-			'Why?',
-			chapter.verses,
-			{ apiKey: 'test', model: 'test' },
-			(async () => new Response('secret upstream details', { status: 401 })) as typeof fetch
-		),
-		/temporarily unavailable/
-	);
-});
-
-test('durable request limits stop requests beyond the hourly allowance and fail closed', async () => {
-	for (const count of [1, 10, 11]) {
-		const allowed = await consumeStudyLimit(
-			'hashed-client',
-			{ url: 'https://redis.example', token: 'test-token' },
-			(async (_url, init) => {
-				const command = JSON.parse(init!.body as string);
-				assert.equal(command[0], 'EVAL');
-				assert.equal(command[3], 'bible:study:hashed-client');
-				return Response.json({ result: count });
-			}) as typeof fetch
-		);
-		assert.equal(allowed, count <= 10);
-	}
-	await assert.rejects(
-		consumeStudyLimit('client', { url: 'https://redis.example', token: 'test' }, (async () =>
-			Response.json({ error: 'unavailable' })) as typeof fetch),
-		/unavailable/
-	);
 });
 
 test('the root reveal attachment discovers new blocks, preserves focus, and honors reduced motion', async () => {

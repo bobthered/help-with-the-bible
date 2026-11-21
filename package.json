@@ -3,18 +3,14 @@
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
-	"overrides": {
-		"sharp": "^0.35.5"
-	},
 	"engines": {
-		"node": ">=22.17.0"
+		"node": "22.x"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
 	},
 	"scripts": {
-		"narration": "node scripts/generate-narration.mjs",
 		"test": "node --experimental-strip-types --test tests/reading.test.ts tests/pwa.test.ts tests/experience.test.ts",
 		"icons": "node scripts/generate-pwa-icons.mjs",
 		"verify:pwa": "node scripts/verify-pwa-build.mjs",
@@ -28,13 +24,11 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@breezystack/lamejs": "^1.2.7",
 		"@sveltejs/adapter-vercel": "^7.0.3",
 		"@sveltejs/kit": "^3.2.0",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.5",
 		"@types/node": "^22.20.5",
-		"kokoro-js": "^1.2.1",
 		"prettier": "^3.10.1",
 		"prettier-plugin-svelte": "^4.1.1",
 		"prettier-plugin-tailwindcss": "^0.8.1",

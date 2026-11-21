@@ -1,13 +1,13 @@
 {
-	"src": "/audio/genesis-1-heart-80fd772154f9.mp3",
-	"audioSha256": "80fd772154f90ec242b3a718b63d154a3addd062eddb35d6075bfb7dd1fe8951",
+	"src": "/audio/genesis-1-heart-793234073a1c.mp3",
+	"audioSha256": "793234073a1c176d4a053ce5a75e43a55f4716175880d8c42f4afd707b5e13b3",
 	"voice": "Heart",
 	"model": "Kokoro-82M",
 	"modelLicense": "Apache-2.0",
 	"synthetic": true,
-	"duration": 300.6,
+	"duration": 294.072,
 	"summaryStart": 253.925,
-	"textSha256": "c3ed47a57e0818986bf1e8bcc92978288241c83ff8f3baf2871eed6e90a25611",
+	"textSha256": "ec155524925709bdeb28711548deb71da2b598ffa1a7889e6abcd724e37dec04",
 	"cues": [
 		{
 			"kind": "verse",
@@ -212,12 +212,6 @@
 			"verse": null,
 			"start": 278.2,
 			"end": 293.775
-		},
-		{
-			"kind": "summary",
-			"verse": null,
-			"start": 294.175,
-			"end": 300.2
 		}
 	]
 }
