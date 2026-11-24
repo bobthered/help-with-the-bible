@@ -9,7 +9,7 @@
 	Skip to content
 </A>
 <header
-	class="site-header shell mx-auto flex min-h-28 w-[min(1200px,_calc(100%_-_96px))] items-center justify-between gap-8 border-b border-b-divider tablet:w-[calc(100%_-_64px)] mobile:min-h-21 mobile:w-[calc(100%_-_40px)] mobile:gap-3.75 [&_nav]:flex [&_nav]:items-center [&_nav]:gap-8 mobile:[&_nav]:gap-2.5"
+	class="site-header shell mx-auto flex min-h-28 w-[min(1200px,_calc(100%_-_96px))] items-center justify-between gap-8 tablet:w-[calc(100%_-_64px)] mobile:min-h-21 mobile:w-[calc(100%_-_40px)] mobile:gap-3.75 [&_nav]:flex [&_nav]:items-center [&_nav]:gap-8 mobile:[&_nav]:gap-2.5"
 >
 	<A
 		href="/"

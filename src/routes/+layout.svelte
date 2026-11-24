@@ -7,7 +7,7 @@
 	import type { LayoutProps } from './$types';
 	import { onMount, setContext } from 'svelte';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { PwaManager, AudioPlayer } from '$lib/components';
+	import { PwaManager, AudioPlayer, SiteHeader } from '$lib/components';
 	import { AUDIO_CONTEXT, initialAudioState } from '$lib/audio/context';
 	import { revealOnScroll } from '$lib/attachments/reveal';
 	import { preventPageZoom } from '$lib/attachments/zoom';
@@ -55,7 +55,10 @@
 	{@attach revealOnScroll}
 	{@attach preventPageZoom}
 >
-	<PwaManager />
+	<div class="sticky top-[env(safe-area-inset-top,0px)] z-50 border-b border-divider bg-surface">
+		<PwaManager />
+		<SiteHeader />
+	</div>
 	{@render children()}
 	<AudioPlayer />
 </div>

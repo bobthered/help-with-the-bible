@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		A,
-		SiteHeader,
 		SiteFooter,
 		ScripturePreview,
 		ReadingJourney,
@@ -22,7 +21,6 @@
 	/>
 </svelte:head>
 
-<SiteHeader />
 <main id="main">
 	<section
 		class="hero shell mx-auto grid w-[min(1200px,_calc(100%_-_96px))] grid-cols-[1.15fr_1fr] items-center gap-20 pt-22 pb-25 min-[1500px]:pt-27.5 min-[1500px]:pb-30 tablet:w-[calc(100%_-_64px)] tablet:gap-11.25 tablet:pt-16.25 tablet:pb-20 mobile:w-[calc(100%_-_40px)] mobile:grid-cols-[1fr] mobile:gap-13.75 mobile:pt-11.25 mobile:pb-16.25 [&_h1]:font-serif [&_h1]:text-[length:clamp(3.25rem,_4.8vw,_4.5rem)] [&_h1]:leading-[1.06] [&_h1]:font-normal [&_h1]:tracking-[-0.045em] tablet:[&_h1]:text-[3.5rem] mobile:[&_h1]:text-[length:clamp(3rem,_11vw,_4.5rem)] [&_h1_em]:font-normal [&_h1_em]:text-accent"

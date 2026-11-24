@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SiteHeader, SiteFooter, ChapterReader } from '$lib/components';
+	import { SiteFooter, ChapterReader } from '$lib/components';
 </script>
 
 <svelte:head>
@@ -9,6 +9,5 @@
 	/>
 </svelte:head>
 
-<SiteHeader />
 <main id="main"><ChapterReader /></main>
 <SiteFooter />
