@@ -1,0 +1,5 @@
+# Isolated maintenance dependencies only; install into ignored .cache/kokoro-python.
+kokoro-onnx==0.6.1
+onnx==1.23.2
+ml-dtypes==0.7.0
+imageio-ffmpeg==0.8.1

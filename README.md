@@ -22,7 +22,7 @@ Playback speed supports 0.5×–2×. Device-voice speed changes apply to subsequ
 
 Use **Download chapter for offline listening** before disconnecting. Downloads are checked against their SHA-256 checksum and stored separately from app updates. Remove a chapter's download using the same panel, or save its audio file directly. Browser storage eviction or clearing site data can remove downloads and progress; keep personal notes backed up.
 
-The complete additional recording library is approximately **934 MB**. It is hosted by Vercel but is not automatically downloaded by the PWA. Most tracks use the installed Windows Microsoft David synthetic voice; Genesis 1 preserves the existing Kokoro Heart recording. All voice identities and source credits appear in `static/audio/NOTICE.txt`. No voice is cloned and no model-generation dependencies are installed by npm.
+The existing additional recording library is approximately **934 MB**. It is hosted by Vercel but is not automatically downloaded by the PWA. **Kokoro Heart (`af_heart`) is the required voice for the replacement library**, preserving the original Genesis 1 Heart track. The offline batch keeps the existing Windows recordings intact until all replacement tracks validate; it never merely changes a voice label. Check the render status below for conversion progress. Voice identities remain accurate in per-chapter metadata and `static/audio/NOTICE.txt`. No voice is cloned, and model-generation dependencies are isolated from the application and Vercel.
 
 ## Development and deployment
 
@@ -64,14 +64,21 @@ python scripts/import-bible.py [path/to/engwebp_vpl.zip]
 python scripts/import-summaries.py [path/to/mhcc.xml]
 ```
 
-Recording generation is a separate Windows maintenance task using Python 3, Windows PowerShell's installed `System.Speech` voices and a local FFmpeg executable. It never runs on Vercel:
+Recording generation is a separate local maintenance task using Kokoro Heart and FFmpeg. The setup script installs pinned packages only into ignored `.cache` directories, verifies the model/voice/tokenizer downloads, and prepares a GPU-compatible export for the Radeon/DirectML backend. That export changes only convolution layout; its learned weights are unchanged and its CPU outputs are checked against the original model. Neither setup nor rendering runs on Vercel:
 
 ```powershell
-python scripts/prepare-recordings.py
-powershell.exe -NoProfile -File scripts/render-recordings.ps1 -Ffmpeg PATH_TO_FFMPEG
-python scripts/prepare-recordings.py --finalize --prune
+powershell.exe -NoProfile -File scripts/setup-heart-tools.ps1
+python scripts/render-heart.py --limit 1              # Optional staged preview
+python scripts/render-heart.py --publish-when-complete
+powershell.exe -NoProfile -File scripts/start-heart-render.ps1 # Background alternative
+python scripts/render-heart.py --status
+npm run verify:heart-tools                           # Tests need no model SDK
 ```
 
-Jobs/WAVs are temporary files in ignored `.cache`; final AAC/M4A files and per-book timing metadata are committed. The renderer can shard work with `-Shard 0 -Shards 4` through `-Shard 3 -Shards 4`. It resumes matching completed tracks and repairs incomplete cue sets. Regeneration requires source/text/cue/audio checksum tests, a production build, and PWA verification before release. Content-hashed audio URLs keep new metadata separate from old downloads. `--prune` removes only obsolete generated tracks in the designated audio directory after finalizing all chapters.
+This is a long-running job: the first Radeon test rendered about 191 seconds of audio in 54 seconds. The full Bible and overviews take many hours on this machine. Keep it running, or rerun the same command after an interruption. Completed chapters and partial verse samples are checkpointed in `.cache/kokoro-heart`; each chapter has exact sample-count-based cues, input/model/voice/tokenizer hashes, and an audio checksum. The default GPU backend will not silently fall back to CPU initialization or to another voice. CPU rendering can be selected explicitly with `--provider cpu`, but is considerably slower.
+
+The renderer stages output privately until all 1,188 replacement chapters validate. With `--publish-when-complete`, it then publishes the Heart files and metadata, preserves Genesis 1, writes `static/audio/metadata/voice-policy.json`, removes only obsolete generated chapter tracks, and automatically runs tests, type checks, a production build and PWA verification. The policy file makes subsequent asset tests require Heart for all 1,189 chapters. Generated files still need to be committed and deployed; the batch never pushes Git or deploys the site.
+
+For an unattended Windows run, `scripts/start-heart-render.ps1` uses a hidden process, prevents duplicate batches, and keeps its PID/output/error logs in `.cache/kokoro-heart`. The status JSON is atomically updated at `.cache/kokoro-heart/progress.json`; `state: verified` means publishing and checks completed. A failure records the error and leaves checkpointed work resumable. Do not commit a claim that the conversion is complete while the job is still rendering. Source changes made during a batch are detected before publishing, so outdated speech cannot replace the current library.
 
 Import components through `$lib/components`, which re-exports Sveltewind and project components. The root attachment applies scroll reveals, and Lenis provides wheel momentum while preserving native touch and reduced motion. Gold/neutral themes live in `src/app.css`.

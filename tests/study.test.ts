@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { books, chapterInfo, loadChapter } from '../src/lib/bible/catalog.ts';
@@ -23,6 +23,22 @@ import { loadSummary } from '../src/lib/bible/summaries.ts';
 import summaries from '../src/lib/bible/summary-catalog.json' with { type: 'json' };
 
 const file = (path: string) => readFileSync(new URL(`../static${path}`, import.meta.url));
+test('offline Kokoro tooling is absent from application dependencies and deployment commands', () => {
+	const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+	const lock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
+	const generator = /kokoro|transformers|onnxruntime|cuda/i;
+	assert.ok(
+		!Object.keys({ ...manifest.dependencies, ...manifest.devDependencies }).some((name) =>
+			generator.test(name)
+		)
+	);
+	assert.ok(!Object.keys(lock.packages ?? {}).some((name) => generator.test(name)));
+	assert.ok(
+		!/render-heart|setup-heart|prepare-heart/.test(
+			`${manifest.scripts.build} ${manifest.scripts.prepare}`
+		)
+	);
+});
 test('all 1,189 summaries contain attributed source text, book context and valid passage links', () => {
 	let total = 0;
 	for (const book of books) {
@@ -165,6 +181,13 @@ test('recorded overview position follows the selected chapter rather than Genesi
 });
 
 test('all recorded chapters match their Scripture/overview inputs, timing cues and audio checksums', () => {
+	const policyFile = new URL('../static/audio/metadata/voice-policy.json', import.meta.url);
+	const heartRequired = existsSync(policyFile);
+	if (heartRequired) {
+		const policy = JSON.parse(readFileSync(policyFile, 'utf8'));
+		assert.equal(policy.voice, 'af_heart');
+		assert.equal(policy.chapters, 1189);
+	}
 	let total = 0;
 	for (const book of books) {
 		const records = JSON.parse(file(`/audio/metadata/${book.id}.json`).toString('utf8'));
@@ -175,6 +198,17 @@ test('all recorded chapters match their Scripture/overview inputs, timing cues a
 			const id = `${book.id}.${index + 1}`,
 				record = records[id];
 			assert.ok(record, id);
+			if (heartRequired) {
+				assert.equal(record.voice, 'af_heart', id);
+				assert.equal(record.model, 'Kokoro-82M', id);
+				assert.ok(record.voiceLabel.includes('Kokoro Heart'), id);
+				if (id !== 'GEN.1') {
+					assert.match(record.modelSha256, /^[a-f0-9]{64}$/);
+					assert.match(record.voiceSha256, /^[a-f0-9]{64}$/);
+					assert.match(record.tokenizerSha256, /^[a-f0-9]{64}$/);
+					assert.equal(record.engine, 'kokoro-onnx');
+				}
+			}
 			const audio = file(record.src);
 			assert.equal(createHash('sha256').update(audio).digest('hex'), record.audioSha256, id);
 			assert.ok(record.duration > record.summaryStart && record.summaryStart > 0, id);

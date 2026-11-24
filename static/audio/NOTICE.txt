@@ -5,7 +5,13 @@ Scripture: World English Bible (public domain), https://ebible.org/engwebp/GEN01
 Summary: Help with the Bible editorial commentary. This is a synthetic voice, not a human recording.
 
 Additional chapter-and-overview tracks in audio/chapters:
-Rendered locally with the installed Microsoft David Desktop speech voice, then encoded as AAC/M4A.
+Replacement tracks are rendered locally with Kokoro-82M, voice af_heart (Heart), and encoded as AAC/M4A.
+Model weights: Apache-2.0, https://huggingface.co/hexgrad/Kokoro-82M
+ONNX export: https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX
+Offline renderer: https://github.com/thewh1teagle/kokoro-onnx
+Model, voice and tokenizer checksums and generation settings are recorded in each new track's metadata.
+The DirectML-compatible export only lifts 1D transpose convolutions to equivalent 2D shapes; learned weights are unchanged and CPU reference outputs are verified.
+Legacy Microsoft David Desktop recordings remain accurately labeled until the complete staged Heart batch is validated and published. No Windows recording is relabeled as Heart.
 These are synthetic recordings, not human narrations. No model server, voice API or credentials are used at runtime.
 Scripture: World English Bible, updated 66-book edition (public domain), https://ebible.org/engwebp/
 Overviews: chapter outlines and first-sentence commentary excerpts from Matthew Henry's Concise Commentary (public domain), https://www.ccel.org/ccel/henry/mhcc.xml

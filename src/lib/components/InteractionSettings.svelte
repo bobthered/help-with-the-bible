@@ -90,15 +90,15 @@
 			value="recorded"
 			disabled={!recordedAvailable}
 		>
-			Recorded chapter & overview · background listening
+			Recorded chapter & overview · all chapters
 		</option>
 	</Select>
 	<p>
 		{!recordedAvailable
 			? 'Standard device voice is available while this chapter recording is unavailable.'
 			: player.narrator === 'device'
-				? 'Uses your device’s standard voice. Keep the app open while listening.'
-				: 'A prerecorded chapter and overview, hosted with this site. Keep playing when the screen locks, subject to your device and interruptions.'}
+				? 'Uses your device’s standard voice with the app open. For lock-screen listening, choose the recorded option, available for every chapter.'
+				: 'Available for every chapter: one recorded track contains the Scripture and overview. Playback can continue when the screen locks, subject to your device and interruptions.'}
 	</p>
 	<label for="playback-rate">
 		Playback speed<Select

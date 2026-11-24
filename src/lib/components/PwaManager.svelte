@@ -112,7 +112,7 @@
 		<p>
 			{!pwa.online
 				? pwa.offlineReady
-					? 'You’re offline. Genesis, its summary, and the bundled recording are available.'
+					? 'You’re offline. All Scripture and chapter overviews are available, along with audio you downloaded.'
 					: 'You’re offline. Reconnect to finish preparing offline reading.'
 				: pwa.error || 'An app update is ready. Your reading place will be kept.'}
 		</p>

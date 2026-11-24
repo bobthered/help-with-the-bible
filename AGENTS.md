@@ -29,8 +29,8 @@
 - Clearly identify planned features. Do not simulate AI answers or imply unsupported chapters are available.
 - Use the persistent root native audio player for recorded Scripture and summaries. Keep each chapter and its spoken summary in one track so background playback does not depend on JavaScript starting the next segment.
 - Everything must deploy as one Vercel site, with no external LLM/model server, AI API, Redis service, or required environment credentials.
-- Use the standard device voice by default. All chapter recordings are served by Vercel. Generate them only as an explicit maintenance task with the installed Windows voice and FFmpeg (`scripts/prepare-recordings.py`, `scripts/render-recordings.ps1`); no speech generation runs during build/deployment. Verify every recording's text checksum, timing cues, and audio checksum. Audio URLs must contain the audio-content hash.
-- Do not install Kokoro, Transformers, ONNX, CUDA, or other model-generation dependencies as part of this project. Deploy the committed audio directly.
+- Use the standard device voice by default. Use Kokoro Heart (`af_heart`) for all prerecorded chapters and overviews; do not substitute a Windows voice. Preserve the existing Genesis 1 Heart track. Generate remaining tracks with `scripts/render-heart.py` in an isolated, ignored local toolchain, never during build/deployment. Verify voice/model provenance, text checksums, all verse/summary cues, and audio checksums. Audio URLs must contain the audio-content hash.
+- Keep Kokoro, Transformers, ONNX, CUDA and synthesis tools out of application dependencies and the Vercel build. The user's explicit approval permits isolated offline Kokoro tooling in `.cache`, which must not be committed or deployed. Stage and validate the complete Heart library before publishing it; never relabel existing Windows recordings as Heart. Keep labels truthful while conversion is in progress.
 
 ## Progressive web app
 
