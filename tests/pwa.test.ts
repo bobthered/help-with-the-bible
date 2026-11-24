@@ -8,6 +8,42 @@ import { audioRangeResponse } from '../src/lib/pwa/range.ts';
 import { DOWNLOAD_CACHE } from '../src/lib/audio/cache.ts';
 
 const origin = 'https://bible.example';
+
+test('initial app navigation mode distinguishes browser tabs, standalone windows and iOS launches', () => {
+	const html = readFileSync(new URL('../src/app.html', import.meta.url), 'utf8');
+	const bootstrap = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+	assert.ok(bootstrap);
+	for (const launch of [
+		{ standalone: false, ios: false, expected: false },
+		{ standalone: true, ios: false, expected: true },
+		{ standalone: false, ios: true, expected: true }
+	]) {
+		const attributes = new Set<string>();
+		runInNewContext(bootstrap, {
+			matchMedia: (query: string) => ({
+				matches: query === '(display-mode: standalone)' && launch.standalone
+			}),
+			navigator: { standalone: launch.ios },
+			localStorage: {
+				getItem() {
+					throw new Error('Storage unavailable');
+				}
+			},
+			document: {
+				documentElement: {
+					dataset: {},
+					toggleAttribute: (name: string, enabled: boolean) => {
+						if (enabled) attributes.add(name);
+						else attributes.delete(name);
+					}
+				},
+				querySelector: () => ({ content: '' })
+			}
+		});
+		assert.equal(attributes.has('data-app-mode'), launch.expected);
+	}
+});
+
 const workerSource = ts.transpileModule(
 	readFileSync(new URL('../src/service-worker/index.ts', import.meta.url), 'utf8'),
 	{ compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }

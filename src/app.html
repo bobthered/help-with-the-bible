@@ -20,6 +20,10 @@
 		<meta name="text-scale" content="scale" />
 		<script>
 			(() => {
+				document.documentElement.toggleAttribute(
+					'data-app-mode',
+					matchMedia('(display-mode: standalone)').matches || Boolean(navigator.standalone)
+				);
 				let mode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 				try {
 					const saved = localStorage.getItem('theme');

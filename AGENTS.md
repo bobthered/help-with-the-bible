@@ -35,6 +35,7 @@
 ## Progressive web app
 
 - Keep the app installable on desktop, iOS, and Android with a web manifest, PNG and maskable icons, Apple touch metadata, and mobile safe-area spacing.
+- In standalone PWA mode (including iOS `navigator.standalone`), replace the top site header with the fixed bottom app bar. Keep the browser header in normal tabs, detect the initial display mode before paint, and update when display mode changes. Keep content and the persistent audio player above the app bar and device safe areas.
 - Maintain the native SvelteKit 3 worker in `src/service-worker`, with its separate TypeScript project. Cache only build-known public resources and prerendered pages; never cache question APIs, uploads, or authenticated responses.
 - Make updates opt-in during an active reading session and preserve local reading progress. Keep offline support limited to bundled or explicitly downloaded content; AI requests require a connection.
 - Run `npm run check`, `npm test`, and `npm run verify:pwa` after a production build when changing PWA behavior. Actual-device installation and audio behavior still require browser/device QA.

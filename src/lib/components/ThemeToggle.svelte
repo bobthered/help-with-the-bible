@@ -2,10 +2,18 @@
 	import { onMount } from 'svelte';
 	import { Button, Sun, Moon } from '$lib/components';
 
+	let { appBar = false }: { appBar?: boolean } = $props();
 	let isDark = $state(false);
 
 	onMount(() => {
-		isDark = document.documentElement.dataset.theme === 'dark';
+		const root = document.documentElement;
+		const syncTheme = () => {
+			isDark = root.dataset.theme === 'dark';
+		};
+		syncTheme();
+		const observer = new MutationObserver(syncTheme);
+		observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+		return () => observer.disconnect();
 	});
 
 	function toggleTheme() {
@@ -24,12 +32,13 @@
 </script>
 
 <Button
-	variants={['themeToggle']}
+	variants={[appBar ? 'appBar' : 'themeToggle']}
 	class="theme-toggle"
 	onclick={toggleTheme}
 	aria-label="Dark mode"
 	aria-pressed={isDark}
 	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >
-	{#if isDark}<Sun size={19} />{:else}<Moon size={19} />{/if}
+	{#if isDark}<Sun size={appBar ? 21 : 19} />{:else}<Moon size={appBar ? 21 : 19} />{/if}
+	{#if appBar}<span>Theme</span>{/if}
 </Button>

@@ -7,7 +7,7 @@
 	import type { LayoutProps } from './$types';
 	import { onMount, setContext } from 'svelte';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { PwaManager, AudioPlayer, SiteHeader } from '$lib/components';
+	import { PwaManager, AudioPlayer, SiteHeader, AppBar } from '$lib/components';
 	import { AUDIO_CONTEXT, initialAudioState } from '$lib/audio/context';
 	import { revealOnScroll } from '$lib/attachments/reveal';
 	import { preventPageZoom } from '$lib/attachments/zoom';
@@ -51,14 +51,17 @@
 </svelte:head>
 
 <div
-	class="site-root min-h-svh [&_[data-highlight='blue']]:bg-[color-mix(in_srgb,#5799d4_18%,var(--surface-raised))] [&_[data-highlight='gold']]:bg-[color-mix(in_srgb,var(--accent)_16%,var(--surface-raised))] [&_[data-reveal-pending]]:translate-y-5 [&_[data-reveal-pending]]:opacity-0 motion-reduce:[&_[data-reveal-pending]]:translate-y-0 motion-reduce:[&_[data-reveal-pending]]:opacity-100 [&:has(.audio-dock-active)]:pb-[calc(135px_+_env(safe-area-inset-bottom))] mobile:[&:has(.audio-dock-active)]:pb-[calc(190px_+_env(safe-area-inset-bottom))]"
+	class="site-root min-h-svh [--app-bar-height:0px] app:pb-[var(--app-bar-height)] app:[--app-bar-height:calc(73px_+_env(safe-area-inset-bottom))] [&_[data-highlight='blue']]:bg-[color-mix(in_srgb,#5799d4_18%,var(--surface-raised))] [&_[data-highlight='gold']]:bg-[color-mix(in_srgb,var(--accent)_16%,var(--surface-raised))] [&_[data-reveal-pending]]:translate-y-5 [&_[data-reveal-pending]]:opacity-0 motion-reduce:[&_[data-reveal-pending]]:translate-y-0 motion-reduce:[&_[data-reveal-pending]]:opacity-100 [&:has(.audio-dock-active)]:pb-[calc(135px_+_env(safe-area-inset-bottom)_+_var(--app-bar-height))] mobile:[&:has(.audio-dock-active)]:pb-[calc(190px_+_env(safe-area-inset-bottom)_+_var(--app-bar-height))]"
 	{@attach revealOnScroll}
 	{@attach preventPageZoom}
 >
-	<div class="sticky top-[env(safe-area-inset-top,0px)] z-50 border-b border-divider bg-surface">
+	<div
+		class="sticky top-[env(safe-area-inset-top,0px)] z-50 border-b border-divider bg-surface app:border-b-0"
+	>
 		<PwaManager />
-		<SiteHeader />
+		<div class="app:hidden"><SiteHeader /></div>
 	</div>
 	{@render children()}
 	<AudioPlayer />
+	<AppBar />
 </div>

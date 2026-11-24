@@ -303,7 +303,7 @@
 </script>
 
 <div
-	class="audio-dock hidden [&_audio]:block [&_audio]:h-11 [&_audio]:w-[min(100%,_480px)] mobile:[&_audio]:order-3 mobile:[&_audio]:w-full [&.audio-dock-active]:fixed [&.audio-dock-active]:inset-x-0 [&.audio-dock-active]:bottom-0 [&.audio-dock-active]:z-60 [&.audio-dock-active]:flex [&.audio-dock-active]:flex-wrap [&.audio-dock-active]:items-center [&.audio-dock-active]:justify-center [&.audio-dock-active]:gap-x-6 [&.audio-dock-active]:gap-y-3 [&.audio-dock-active]:border-t [&.audio-dock-active]:border-t-divider [&.audio-dock-active]:bg-surface [&.audio-dock-active]:px-[max(20px,env(safe-area-inset-left))] [&.audio-dock-active]:pt-3.5 [&.audio-dock-active]:pb-[calc(14px_+_env(safe-area-inset-bottom))] [&.audio-dock-active]:shadow-[0_-5px_20px_#00000008] mobile:[&.audio-dock-active]:gap-x-3.5 mobile:[&.audio-dock-active]:gap-y-2"
+	class="audio-dock hidden [&_audio]:block [&_audio]:h-11 [&_audio]:w-[min(100%,_480px)] mobile:[&_audio]:order-3 mobile:[&_audio]:w-full [&.audio-dock-active]:fixed [&.audio-dock-active]:inset-x-0 [&.audio-dock-active]:bottom-[var(--app-bar-height)] [&.audio-dock-active]:z-60 [&.audio-dock-active]:flex [&.audio-dock-active]:flex-wrap [&.audio-dock-active]:items-center [&.audio-dock-active]:justify-center [&.audio-dock-active]:gap-x-6 [&.audio-dock-active]:gap-y-3 [&.audio-dock-active]:border-t [&.audio-dock-active]:border-t-divider [&.audio-dock-active]:bg-surface [&.audio-dock-active]:px-[max(20px,env(safe-area-inset-left))] [&.audio-dock-active]:pt-3.5 [&.audio-dock-active]:pb-[calc(14px_+_env(safe-area-inset-bottom))] [&.audio-dock-active]:shadow-[0_-5px_20px_#00000008] app:[&.audio-dock-active]:pb-3.5 mobile:[&.audio-dock-active]:gap-x-3.5 mobile:[&.audio-dock-active]:gap-y-2"
 	class:audio-dock-active={player.started || player.speaking}
 >
 	{#if player.speaking}<span>
@@ -350,7 +350,7 @@
 		</Button>{/if}
 </div>
 {#if player.error}<p
-		class="audio-error fixed right-5 bottom-[calc(110px_+_env(safe-area-inset-bottom))] left-5 z-65 m-auto max-w-175 border border-divider bg-surface-soft px-5 py-3.5 text-sm text-foreground"
+		class="audio-error fixed right-5 bottom-[calc(110px_+_env(safe-area-inset-bottom)_+_var(--app-bar-height))] left-5 z-65 m-auto max-w-175 border border-divider bg-surface-soft px-5 py-3.5 text-sm text-foreground"
 		role="status"
 	>
 		{player.error}

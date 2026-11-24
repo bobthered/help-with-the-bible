@@ -1,8 +1,12 @@
 import { minimal } from 'sveltewind/themes';
 import type { ThemeObject } from 'sveltewind/theme';
 
+const appBarItem =
+	'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[0.6875rem] font-medium leading-4 text-muted no-underline transition-colors hover:bg-surface-soft hover:text-foreground aria-[current=page]:bg-surface-soft aria-[current=page]:text-accent aria-[current=location]:bg-surface-soft aria-[current=location]:text-accent';
+
 /** Shared appearances resolve through Sveltewind before per-instance class overrides. */
 const buttonVariants = {
+	appBar: appBarItem,
 	primary:
 		'inline-flex items-center justify-center gap-2.5 min-h-12 py-3.25 px-5.75 rounded bg-primary-500 text-gray-950 text-sm font-semibold leading-[1.5] no-underline border border-transparent hover:text-gray-950 hover:bg-primary-400 focus-visible:text-gray-950 focus-visible:bg-primary-400 disabled:opacity-45 disabled:cursor-not-allowed',
 	secondary:
@@ -29,6 +33,10 @@ export const siteTheme: ThemeObject = {
 	},
 	a: {
 		base: 'text-foreground underline decoration-primary-500 underline-offset-4 transition-colors hover:text-accent motion-reduce:transition-none',
-		variants: { primary: buttonVariants.primary, textLink: buttonVariants.textLink }
+		variants: {
+			primary: buttonVariants.primary,
+			textLink: buttonVariants.textLink,
+			appBar: appBarItem
+		}
 	}
 };

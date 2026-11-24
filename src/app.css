@@ -4,6 +4,7 @@
 @source '../node_modules/sveltewind/dist';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+@custom-variant app (&:where([data-app-mode], [data-app-mode] *));
 /* Preserve the site's inclusive responsive boundaries. */
 @custom-variant tablet (@media (max-width: 1000px));
 @custom-variant mobile (@media (max-width: 760px));

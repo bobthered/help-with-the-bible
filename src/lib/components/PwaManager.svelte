@@ -18,6 +18,7 @@
 		const syncDisplay = () => {
 			pwa.installed =
 				display.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+			document.documentElement.toggleAttribute('data-app-mode', pwa.installed);
 		};
 		const syncOnline = () => {
 			pwa.online = navigator.onLine;
