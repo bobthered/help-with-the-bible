@@ -2,7 +2,7 @@
 	import '../app.css';
 	import Lenis from 'lenis';
 	import { theme } from 'sveltewind/theme';
-	import { minimal } from 'sveltewind/themes';
+	import { siteTheme } from '$lib/theme';
 	import favicon from '#lib/assets/favicon.svg';
 	import type { LayoutProps } from './$types';
 	import { onMount, setContext } from 'svelte';
@@ -19,7 +19,7 @@
 	const audio = $state(initialAudioState());
 	setContext(AUDIO_CONTEXT, audio);
 
-	theme.set.theme(structuredClone(minimal));
+	theme.set.theme(structuredClone(siteTheme));
 
 	let scrolling: Lenis | undefined;
 	onMount(() => {
@@ -50,7 +50,11 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="site-root" {@attach revealOnScroll} {@attach preventPageZoom}>
+<div
+	class="site-root min-h-svh [&_[data-highlight='blue']]:bg-[color-mix(in_srgb,#5799d4_18%,var(--surface-raised))] [&_[data-highlight='gold']]:bg-[color-mix(in_srgb,var(--accent)_16%,var(--surface-raised))] [&_[data-reveal-pending]]:translate-y-5 [&_[data-reveal-pending]]:opacity-0 motion-reduce:[&_[data-reveal-pending]]:translate-y-0 motion-reduce:[&_[data-reveal-pending]]:opacity-100 [&:has(.audio-dock-active)]:pb-[calc(135px_+_env(safe-area-inset-bottom))] mobile:[&:has(.audio-dock-active)]:pb-[calc(190px_+_env(safe-area-inset-bottom))]"
+	{@attach revealOnScroll}
+	{@attach preventPageZoom}
+>
 	<PwaManager />
 	{@render children()}
 	<AudioPlayer />

@@ -67,31 +67,43 @@
 	}
 </script>
 
-<div class="audio-download-panel">
+<div
+	class="audio-download-panel mt-9 border-t border-t-divider pt-6 [&_h3]:mt-5 [&_h3]:mb-3 [&_h3]:font-serif [&_h3]:text-[length:1.4rem]"
+>
 	<h3>Recorded chapter & overview</h3>
-	<p class="reader-smallprint">
+	<p class="reader-smallprint mt-5.5 text-xs leading-[1.8] text-muted">
 		{recording?.voiceLabel ?? 'Recorded synthetic voice'} · One continuous track for background listening.
 		Download this chapter before going offline.
 	</p>
-	{#if recording}<div class="audio-download-actions">
+	{#if recording}<div class="audio-download-actions flex flex-wrap items-center gap-2.5">
 			{#if downloaded}<span role="status">Downloaded on this device</span><Button
-					variants={['ghost']}
+					variants={['secondary']}
 					class="button-secondary"
 					onclick={remove}
 				>
 					Remove offline download
 				</Button>
-			{:else}<Button class="button-secondary" onclick={download} disabled={busy}>
+			{:else}<Button
+					variants={['secondary']}
+					class="button-secondary"
+					onclick={download}
+					disabled={busy}
+				>
 					{busy ? 'Downloading chapter…' : 'Download chapter for offline listening'}
 				</Button>{/if}
 			{#if busy}<Button
-					variants={['ghost']}
+					variants={['secondary']}
 					class="button-secondary"
 					onclick={() => controller?.abort()}
 				>
 					Cancel download
 				</Button>{/if}
-			<A href={recording.src} download class="text-link">Save audio file</A>
+			<A variants={['textLink']} href={recording.src} download>Save audio file</A>
 		</div>{/if}
-	{#if error}<p role="alert" class="storage-warning">{error}</p>{/if}
+	{#if error}<p
+			role="alert"
+			class="storage-warning mt-6 border border-primary-600 p-4 text-sm leading-[1.7]"
+		>
+			{error}
+		</p>{/if}
 </div>

@@ -163,10 +163,13 @@
 	}
 </script>
 
-<section class="study-panel" aria-label="Study tools">
-	<div class="verse-tools">
+<section
+	class="study-panel mt-9 border-t border-t-divider pt-6 [&_h3]:mt-5 [&_h3]:mb-3 [&_h3]:font-serif [&_h3]:text-[length:1.4rem] [&_input]:min-h-11 [&_input]:max-w-full [&_input]:rounded [&_input]:border [&_input]:border-divider [&_input]:bg-surface [&_input]:px-3 [&_input]:py-2.5 [&_input]:text-foreground phone:[&_input[type='file']]:w-full [&_label]:grid [&_label]:gap-2 [&_label]:text-sm [&_select]:min-h-11 [&_select]:max-w-full [&_select]:rounded [&_select]:border [&_select]:border-divider [&_select]:bg-surface [&_select]:px-3 [&_select]:py-2.5 [&_select]:text-foreground [&_textarea]:min-h-11 [&_textarea]:w-full [&_textarea]:max-w-full [&_textarea]:resize-y [&_textarea]:rounded [&_textarea]:border [&_textarea]:border-divider [&_textarea]:bg-surface [&_textarea]:px-3 [&_textarea]:py-2.5 [&_textarea]:text-foreground"
+	aria-label="Study tools"
+>
+	<div class="verse-tools flex flex-wrap items-center gap-2.5">
 		<span>{reference}</span><Button
-			variants={['ghost']}
+			variants={['secondary']}
 			class="button-secondary"
 			disabled={!ready}
 			aria-pressed={current?.bookmarked ?? false}
@@ -175,7 +178,9 @@
 			{current?.bookmarked ? 'Remove bookmark' : 'Bookmark verse'}
 		</Button>
 	</div>
-	<details class="study-disclosure">
+	<details
+		class="study-disclosure border-b border-b-divider py-4.5 [&_>_.button-secondary]:my-3.5 [&_>_label]:my-3.5 [&_>_p]:my-3.5 [&_>_summary]:min-h-9 [&_>_summary]:cursor-pointer [&_>_summary]:text-foreground [&[open]_>_summary]:mb-4.5"
+	>
 		<summary>Notes & highlights for this verse</summary>
 		<label for="highlight">
 			Highlight<Select id="highlight" bind:value={highlight}>
@@ -192,19 +197,32 @@
 				rows="4"
 				placeholder="What stands out to you?"></textarea>
 		</label>
-		<Button class="button-secondary" disabled={!ready} onclick={() => save()}>
+		<Button
+			variants={['secondary']}
+			class="button-secondary"
+			disabled={!ready}
+			onclick={() => save()}
+		>
 			Save note & highlight
 		</Button>
-		<p class="reader-smallprint">
+		<p class="reader-smallprint mt-5.5 text-xs leading-[1.8] text-muted">
 			Your notes stay on this device. They are separate from Scripture.
 		</p>
 	</details>
-	{#if notice}<p role="status">{notice}</p>{/if}{#if error}<p class="storage-warning" role="alert">
+	{#if notice}<p role="status">{notice}</p>{/if}{#if error}<p
+			class="storage-warning mt-6 border border-primary-600 p-4 text-sm leading-[1.7]"
+			role="alert"
+		>
 			{error}
 		</p>{/if}
-	<details class="study-disclosure">
+	<details
+		class="study-disclosure border-b border-b-divider py-4.5 [&_>_.button-secondary]:my-3.5 [&_>_label]:my-3.5 [&_>_p]:my-3.5 [&_>_summary]:min-h-9 [&_>_summary]:cursor-pointer [&_>_summary]:text-foreground [&[open]_>_summary]:mb-4.5"
+	>
 		<summary>Search Scripture</summary>
-		<form onsubmit={search} class="scripture-search">
+		<form
+			onsubmit={search}
+			class="scripture-search flex flex-wrap items-end gap-3.5 [&_input]:w-full [&_label]:min-w-0 [&_label]:flex-[1_1_180px]"
+		>
 			<label for="scripture-query">
 				Words or reference<input
 					id="scripture-query"
@@ -223,41 +241,46 @@
 						</option>{/each}
 				</Select>
 			</label>
-			<Button class="button-secondary" type="submit">
+			<Button variants={['secondary']} class="button-secondary" type="submit">
 				{searching ? 'Search again' : 'Search'}
 			</Button>
 		</form>
 		{#if searching}<p role="status">{searchProgress || 'Searching Scripture…'}</p>{/if}
-		{#if searchError}<p role="alert" class="storage-warning">{searchError}</p>{/if}
+		{#if searchError}<p
+				role="alert"
+				class="storage-warning mt-6 border border-primary-600 p-4 text-sm leading-[1.7]"
+			>
+				{searchError}
+			</p>{/if}
 		{#if total !== null}<p role="status">
 				{total === 0
 					? 'No matching verses.'
 					: `${total} matching verses${total > 200 ? ' · showing the first 200; narrow your search for more.' : '.'}`}
 			</p>{/if}
-		<div class="search-results">
+		<div class="search-results mt-4 grid max-h-125 gap-3 overflow-auto">
 			{#each results as result}<Button
-					variants={['ghost']}
+					variants={['searchResult']}
 					class="search-result"
 					onclick={() => onopen(result.chapterId, result.verse)}
 				>
 					<strong>{result.book} {result.chapter}:{result.verse}</strong><span>{result.text}</span>
 				</Button>{/each}
 		</div>
-		<p class="reader-smallprint">
+		<p class="reader-smallprint mt-5.5 text-xs leading-[1.8] text-muted">
 			Search works offline after initial setup. Use quotation marks for an exact phrase.
 		</p>
 	</details>
-	<details class="study-disclosure">
+	<details
+		class="study-disclosure border-b border-b-divider py-4.5 [&_>_.button-secondary]:my-3.5 [&_>_label]:my-3.5 [&_>_p]:my-3.5 [&_>_summary]:min-h-9 [&_>_summary]:cursor-pointer [&_>_summary]:text-foreground [&[open]_>_summary]:mb-4.5"
+	>
 		<summary>Saved passages ({saved.length})</summary>
 		{#if !saved.length}<p>
 				Bookmark a verse, add a highlight, or save a note to find it here.
 			</p>{/if}
-		{#each saved as item}<div class="saved-passage">
-				<Button
-					variants={['ghost']}
-					class="text-link"
-					onclick={() => onopen(item.chapterId, item.verse)}
-				>
+		{#each saved as item}<div
+				class="saved-passage border-b border-b-divider py-3.5 [&_p]:mt-2 [&_p]:leading-[1.8] [&_p]:[overflow-wrap:anywhere] [&_p]:whitespace-pre-wrap [&_p]:text-muted"
+			>
+				<Button variants={['textLink']} onclick={() => onopen(item.chapterId, item.verse)}>
 					{chapterInfo(item.chapterId)?.book}
 					{chapterInfo(item.chapterId)?.chapter}:{item.verse}{item.bookmarked
 						? ' · bookmarked'
@@ -265,13 +288,17 @@
 				</Button>{#if item.note}<p>{item.note}</p>{/if}
 			</div>{/each}
 	</details>
-	<details class="study-disclosure">
+	<details
+		class="study-disclosure border-b border-b-divider py-4.5 [&_>_.button-secondary]:my-3.5 [&_>_label]:my-3.5 [&_>_p]:my-3.5 [&_>_summary]:min-h-9 [&_>_summary]:cursor-pointer [&_>_summary]:text-foreground [&[open]_>_summary]:mb-4.5"
+	>
 		<summary>Backup & restore</summary>
 		<p>
 			Export your reading place, completed chapters, notes, highlights, bookmarks, and preferences.
 			Import the file on another device to continue there.
 		</p>
-		<Button class="button-secondary" onclick={exportData}>Download backup</Button>
+		<Button variants={['secondary']} class="button-secondary" onclick={exportData}>
+			Download backup
+		</Button>
 		<label for="backup-file">
 			Choose a backup to restore<input
 				bind:this={fileInput}
@@ -281,7 +308,9 @@
 				onchange={chooseBackup}
 			/>
 		</label>
-		{#if backup}<div class="backup-preview">
+		{#if backup}<div
+				class="backup-preview mt-4 border border-divider p-4.5 [&_p]:mb-3.5 [&_p]:leading-[1.8]"
+			>
 				<h3>Review this backup</h3>
 				<p>
 					Exported {new Date(backup.exportedAt).toLocaleString()}. Reading place: {chapterInfo(
@@ -296,10 +325,10 @@
 					Restoring replaces the data on this device. Download your current backup first if you want
 					to keep it. Recorded audio downloads are not included.
 				</p>
-				<Button class="button-primary" onclick={restore}>
+				<Button variants={['primary']} class="button-primary" onclick={restore}>
 					Replace local data with this backup
 				</Button><Button
-					variants={['ghost']}
+					variants={['secondary']}
 					class="button-secondary"
 					onclick={() => {
 						backup = null;
@@ -309,8 +338,13 @@
 					Cancel
 				</Button>
 			</div>{/if}
-		{#if backupError}<p role="alert" class="storage-warning">{backupError}</p>{/if}
-		<p class="reader-smallprint">
+		{#if backupError}<p
+				role="alert"
+				class="storage-warning mt-6 border border-primary-600 p-4 text-sm leading-[1.7]"
+			>
+				{backupError}
+			</p>{/if}
+		<p class="reader-smallprint mt-5.5 text-xs leading-[1.8] text-muted">
 			Backup files contain your personal notes. Keep them somewhere private. No account or upload is
 			required.
 		</p>

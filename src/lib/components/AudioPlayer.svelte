@@ -302,15 +302,20 @@
 	});
 </script>
 
-<div class="audio-dock" class:audio-dock-active={player.started || player.speaking}>
+<div
+	class="audio-dock hidden [&_audio]:block [&_audio]:h-11 [&_audio]:w-[min(100%,_480px)] mobile:[&_audio]:order-3 mobile:[&_audio]:w-full [&.audio-dock-active]:fixed [&.audio-dock-active]:inset-x-0 [&.audio-dock-active]:bottom-0 [&.audio-dock-active]:z-60 [&.audio-dock-active]:flex [&.audio-dock-active]:flex-wrap [&.audio-dock-active]:items-center [&.audio-dock-active]:justify-center [&.audio-dock-active]:gap-x-6 [&.audio-dock-active]:gap-y-3 [&.audio-dock-active]:border-t [&.audio-dock-active]:border-t-divider [&.audio-dock-active]:bg-surface [&.audio-dock-active]:px-[max(20px,env(safe-area-inset-left))] [&.audio-dock-active]:pt-3.5 [&.audio-dock-active]:pb-[calc(14px_+_env(safe-area-inset-bottom))] [&.audio-dock-active]:shadow-[0_-5px_20px_#00000008] mobile:[&.audio-dock-active]:gap-x-3.5 mobile:[&.audio-dock-active]:gap-y-2"
+	class:audio-dock-active={player.started || player.speaking}
+>
 	{#if player.speaking}<span>
 			Device voice · {spokenChapter?.book}
 			{spokenChapter?.chapter}
 			{player.phase === 'summary' ? 'overview' : `verse ${player.verse}`}
-		</span><Button variants={['ghost']} class="button-secondary" onclick={player.stopSpeech}>
+		</span><Button variants={['secondary']} class="button-secondary" onclick={player.stopSpeech}>
 			Stop device voice
 		</Button>{/if}
-	{#if player.started}<div class="audio-dock-label">
+	{#if player.started}<div
+			class="audio-dock-label text-[0.8125rem] leading-[1.8] mobile:flex-1 [&_>_a]:block [&_>_a]:text-foreground [&_>_a]:no-underline [&_>_span]:block [&_>_span]:text-[0.6875rem] [&_>_span]:text-muted"
+		>
 			<A href="/read">
 				{nativeChapter?.book}
 				{nativeChapter?.chapter} · {player.phase === 'summary'
@@ -326,14 +331,14 @@
 		aria-label={`${nativeChapter?.book} ${nativeChapter?.chapter} and chapter overview narration`}
 		hidden={!player.started}
 	></audio>
-	{#if player.sleepEndsAt}<span class="reader-smallprint">
+	{#if player.sleepEndsAt}<span class="reader-smallprint mt-5.5 text-xs leading-[1.8] text-muted">
 			Sleep timer ends at {new Date(player.sleepEndsAt).toLocaleTimeString([], {
 				hour: 'numeric',
 				minute: '2-digit'
 			})}
 		</span>{/if}
 	{#if player.started}<Button
-			variants={['ghost']}
+			variants={['audioClose']}
 			class="audio-close"
 			onclick={() => {
 				player.pause();
@@ -344,4 +349,9 @@
 			Close player
 		</Button>{/if}
 </div>
-{#if player.error}<p class="audio-error" role="status">{player.error}</p>{/if}
+{#if player.error}<p
+		class="audio-error fixed right-5 bottom-[calc(110px_+_env(safe-area-inset-bottom))] left-5 z-65 m-auto max-w-175 border border-divider bg-surface-soft px-5 py-3.5 text-sm text-foreground"
+		role="status"
+	>
+		{player.error}
+	</p>{/if}

@@ -24,7 +24,7 @@
 </script>
 
 <Button
-	variants={['ghost']}
+	variants={['themeToggle']}
 	class="theme-toggle"
 	onclick={toggleTheme}
 	aria-label="Dark mode"

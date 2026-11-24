@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="en" data-color="gold" data-theme="light" class="motion-safe:scroll-smooth">
+<html
+	lang="en"
+	data-color="gold"
+	data-theme="light"
+	class="touch-pan-x touch-pan-y motion-safe:scroll-smooth [&.lenis]:scroll-auto"
+>
 	<head>
 		<meta charset="utf-8" />
 		<meta
@@ -27,7 +32,10 @@
 		</script>
 		%sveltekit.head%
 	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
+	<body
+		class="m-0 touch-pan-x touch-pan-y bg-surface p-[env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)] font-sans text-base text-foreground selection:bg-primary-200 selection:text-gray-950 motion-reduce:[&_*]:animate-none! motion-reduce:[&_*]:scroll-auto! motion-reduce:[&_*]:transition-none! [&_:focus-visible]:outline-2 [&_:focus-visible]:outline-offset-4 [&_:focus-visible]:outline-accent [&_input]:text-base [&_select]:text-base [&_textarea]:text-base"
+		data-sveltekit-preload-data="hover"
+	>
+		<div class="contents">%sveltekit.body%</div>
 	</body>
 </html>

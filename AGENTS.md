@@ -59,6 +59,8 @@
   ```
 
 - Export project-specific components from the same barrel so all components are available through `$lib/components`.
+- Style components with Tailwind utilities using Sveltewind's theme protocol: configure shared component `base` classes and named `variants` in `src/lib/theme.ts`, initialize the theme in the root layout, and select appearances with the `variants` prop. Use a component's `class` prop for one-off utilities and responsive/state overrides; use a separate `Theme` via the `theme` prop when an isolated theme is needed. Clone presets before customizing them.
+- Keep `src/app.css` limited to stylesheet imports, Tailwind source/variant/theme configuration, and global palette/design tokens. Do not add component selectors or layout/typography rules there, or move those rules into component `<style>` blocks. Keep static styling in Tailwind classes; runtime values such as user-selected font size, line spacing, and progress may use inline CSS custom properties consumed by utilities. Preserve root-managed reveals, reduced-motion support, focus visibility, safe-area spacing, and form-control text of at least 16px.
 
 ## Changelog and commit messages
 

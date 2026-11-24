@@ -49,11 +49,17 @@
 	}
 </script>
 
-<div class="interaction-settings">
-	<div class="interaction-switch" role="group" aria-label="Reading mode">
+<div
+	class="interaction-settings mb-7.5 border-y border-y-divider py-5 [&_>_p]:mt-3 [&_>_p]:text-xs [&_>_p]:leading-[1.7] [&_>_p]:text-muted [&_label]:mt-3.5 [&_label]:mr-3 [&_label]:inline-block [&_label]:text-[0.8125rem] phone:[&_label]:block [&_select]:max-w-full [&_select]:border [&_select]:border-divider [&_select]:bg-surface [&_select]:px-3 [&_select]:py-2 [&_select]:text-foreground"
+>
+	<div
+		class="interaction-switch inline-flex gap-1.25 rounded-[5px] border border-divider p-1"
+		role="group"
+		aria-label="Reading mode"
+	>
 		<Button
-			variants={['ghost']}
-			class={player.mode === 'text' ? 'mode-button mode-selected' : 'mode-button'}
+			variants={['mode']}
+			class="mode-button"
 			aria-pressed={player.mode === 'text'}
 			onclick={() => {
 				player.mode = 'text';
@@ -64,8 +70,8 @@
 		>
 			Read
 		</Button><Button
-			variants={['ghost']}
-			class={player.mode === 'voice' ? 'mode-button mode-selected' : 'mode-button'}
+			variants={['mode']}
+			class="mode-button"
 			aria-pressed={player.mode === 'voice'}
 			onclick={() => {
 				player.mode = 'voice';

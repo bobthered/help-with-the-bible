@@ -108,7 +108,10 @@
 </script>
 
 {#if !pwa.online || pwa.updateReady || pwa.error}
-	<div class="pwa-notice" role="status">
+	<div
+		class="pwa-notice sticky [top:env(safe-area-inset-top,_0px)] z-50 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-b border-b-divider bg-surface-soft px-5 py-3 text-[0.8125rem] leading-[1.6] text-foreground [&_.button-primary]:min-h-11 [&_.button-primary]:px-4.5 [&_.button-primary]:py-2.25"
+		role="status"
+	>
 		<p>
 			{!pwa.online
 				? pwa.offlineReady
@@ -117,6 +120,7 @@
 				: pwa.error || 'An app update is ready. Your reading place will be kept.'}
 		</p>
 		{#if pwa.updateReady && pwa.online}<Button
+				variants={['primary']}
 				class="button-primary"
 				onclick={pwa.update}
 				disabled={pwa.updating}
